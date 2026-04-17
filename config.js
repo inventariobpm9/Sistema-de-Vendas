@@ -8,7 +8,7 @@
 
 const CESTAS_CONFIG = {
   // 👇 Cole aqui a URL do seu Apps Script após publicar como "Aplicativo da Web"
-  API_URL:   'SUA_URL_AQUI',
+  API_URL:   'https://script.google.com/macros/s/AKfycbye3EHth0vzIfXx3K-5ec9MXV42XXHNs1XQbqHdjlAYm46FOZNn2l7sOg7xjCak867Crg/exec',
   TIMEOUT_MS: 20000,   // 20 s — GAS pode ser lento
   VERSION:   '1.0.0'
 };
