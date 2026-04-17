@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistema de Cestas — Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#06080c;--ink2:#0c1018;--ink3:#121820;--ink4:#1a2535;
+  --line:#1e2d40;--line2:#273a52;
+  --ac:#ff6eb4;--ac-dim:rgba(255,110,180,.1);--ac-glow:rgba(255,110,180,.22);
+  --ac2:#f5a623;--ac2-dim:rgba(245,166,35,.1);
+  --red:#ff4d6d;--amber:#f5a623;--green:#22d76e;--purple:#9b5de5;--teal:#00e5b4;
+  --txt:#d8e8f5;--txt2:#7a98b8;--txt3:#3a5570;
+  --sb-w:256px;--hdr-h:54px;--rad:10px;
+  --mono:'Share Tech Mono',monospace;--sans:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif;
+  --tr:.2s cubic-bezier(.4,0,.2,1);
+}
+html,body{height:100%;overflow:hidden;font-family:var(--sans);background:var(--ink);color:var(--txt)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:4px}
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.sb{width:var(--sb-w);min-width:var(--sb-w);background:var(--ink2);border-right:1px solid var(--line);display:flex;flex-direction:column;position:relative;z-index:50;overflow:hidden}
+.sb-brand{height:var(--hdr-h);display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--line);flex-shrink:0}
+.sb-brand-ico{width:34px;height:34px;border-radius:9px;flex-shrink:0;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 18px var(--ac-glow)}
+.sb-brand-name strong{font-family:var(--cond);font-size:14px;font-weight:800;letter-spacing:.5px;color:var(--txt);display:block}
+.sb-brand-name span{font-size:9px;color:var(--txt3);font-family:var(--mono);letter-spacing:.5px}
+.sb-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 0}
+.sb-sec{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt3);padding:12px 18px 4px}
+.sb-item{display:flex;align-items:center;padding:0 12px;height:40px;cursor:pointer;border-radius:8px;margin:1px 6px;transition:all var(--tr);color:var(--txt2);position:relative;overflow:hidden;white-space:nowrap}
+.sb-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--ac);border-radius:0 2px 2px 0;transform:scaleY(0);transition:transform var(--tr)}
+.sb-item:hover{background:var(--ac-dim);color:var(--txt)}
+.sb-item.on{background:var(--ac-dim);color:var(--ac)}
+.sb-item.on::before{transform:scaleY(1)}
+.sb-item.on.b2{color:var(--ac2);background:var(--ac2-dim)}.sb-item.on.b2::before{background:var(--ac2)}
+.sb-item.on.bgreen{color:var(--green);background:rgba(34,215,110,.08)}.sb-item.on.bgreen::before{background:var(--green)}
+.sb-item.on.bteal{color:var(--teal);background:rgba(0,229,180,.08)}.sb-item.on.bteal::before{background:var(--teal)}
+.sb-ico{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-right:10px}
+.sb-lbl{flex:1;font-size:13px;font-weight:500}
+.sb-badge{background:var(--ac);color:#000;font-size:9px;font-weight:700;padding:1px 6px;border-radius:12px;font-family:var(--mono);flex-shrink:0}
+.sb-badge.b2{background:var(--ac2);color:#000}
+.sb-badge.bgreen{background:var(--green);color:#000}
+.sb-badge.bteal{background:var(--teal);color:#000}
+.sb-usr{padding:10px;border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.usr-ava{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:16px}
+.usr-info{overflow:hidden;flex:1}
+.usr-nome{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.usr-sub{font-size:10px;color:var(--txt3);font-family:var(--mono)}
+
+/* ── MAIN ─────────────────────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:var(--hdr-h);background:var(--ink2);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0;gap:12px}
+.tb-l{display:flex;align-items:center;gap:12px}
+.tb-bc{display:flex;align-items:center;gap:6px;font-size:13px}
+.tb-bc-r{color:var(--txt3)}.tb-bc-s{color:var(--txt3);font-size:9px}.tb-bc-c{font-weight:600;color:var(--txt)}
+.tb-r{display:flex;align-items:center;gap:9px}
+.tb-counts{display:flex;align-items:center;gap:14px;background:var(--ink3);border:1px solid var(--line);border-radius:8px;padding:5px 13px}
+.tc{text-align:center}
+.tc-v{font-size:17px;font-weight:800;line-height:1;color:var(--ac);font-family:var(--mono)}
+.tc-l{font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--txt3);margin-top:1px}
+.tc.b2 .tc-v{color:var(--ac2)}.tc.bgreen .tc-v{color:var(--green)}
+.tb-sep{width:1px;height:22px;background:var(--line)}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:18px 22px}
+.pg{display:none;animation:pgIn .18s ease both}
+.pg.on{display:block}
+@keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── DASH CARDS ──────────────────────────────────────────── */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.dcard{background:var(--ink2);border:1px solid var(--line);border-radius:var(--rad);padding:16px;position:relative;overflow:hidden;transition:border-color var(--tr),transform var(--tr)}
+.dcard::after{content:'';position:absolute;inset:0;background:var(--card-ac,transparent);opacity:.04;pointer-events:none}
+.dcard:hover{border-color:var(--card-ac,var(--line2));transform:translateY(-2px)}
+.dcard.c-pink{--card-ac:var(--ac)}.dcard.c-green{--card-ac:var(--green)}.dcard.c-amber{--card-ac:var(--amber)}
+.dcard.c-teal{--card-ac:var(--teal)}.dcard.c-purple{--card-ac:var(--purple)}
+.dc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.dc-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(255,255,255,.04)}
+.dc-badge{font-size:9px;font-weight:700;font-family:var(--mono);padding:2px 7px;border-radius:5px}
+.dc-badge.up{background:rgba(34,215,110,.1);color:var(--green)}
+.dc-badge.warn{background:rgba(245,166,35,.1);color:var(--amber)}
+.dc-badge.bad{background:rgba(255,77,109,.1);color:var(--red)}
+.dc-val{font-size:28px;font-weight:800;font-family:var(--mono);line-height:1;color:var(--card-ac,var(--txt))}
+.dc-lbl{font-size:10px;color:var(--txt3);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.dc-bar{height:2px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:10px;overflow:hidden}
+.dc-fill{height:100%;border-radius:2px;background:var(--card-ac,var(--ac));transition:width .6s ease}
+
+/* ── PANELS ──────────────────────────────────────────────── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+@media(max-width:760px){.two-col{grid-template-columns:1fr}}
+.panel-box{background:var(--ink2);border:1px solid var(--line);border-radius:var(--rad);overflow:hidden}
+.ph{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.ph h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--txt2)}
+.pb-body{padding:10px 14px}
+.rank-rows{display:flex;flex-direction:column;gap:7px}
+.rank-row{display:flex;align-items:center;gap:10px}
+.rank-num{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--txt3);min-width:18px}
+.rank-name{font-size:11px;flex:1;color:var(--txt)}
+.rank-val{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--green)}
+.rank-bar{flex:0 0 60px;height:4px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.rank-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.resumo-rows{display:flex;flex-direction:column;gap:7px}
+.resumo-row{display:flex;align-items:center;gap:8px}
+.resumo-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.resumo-name{font-size:12px;flex:1}
+.resumo-num{font-size:11px;font-weight:700;font-family:var(--mono)}
+
+/* ── MODELOS CARDS ───────────────────────────────────────── */
+.modelos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.mc{background:var(--ink2);border:1px solid var(--line);border-radius:var(--rad);overflow:hidden;transition:border-color var(--tr),transform var(--tr)}
+.mc:hover{border-color:var(--ac);transform:translateY(-2px)}
+.mc-hdr{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.mc-hdr-l{display:flex;align-items:center;gap:10px}
+.mc-ico{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.mc-nome{font-size:13px;font-weight:700}
+.mc-desc{font-size:11px;color:var(--txt3);margin-top:2px}
+.mc-margem{font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--ac2-dim);color:var(--ac2);font-family:var(--mono)}
+.mc-body{padding:12px 16px}
+.mc-kpis{display:flex;gap:10px;margin-bottom:10px}
+.mc-kpi{flex:1;text-align:center;background:var(--ink3);border-radius:6px;padding:8px}
+.mc-kpi-v{font-size:14px;font-weight:800;font-family:var(--mono);color:var(--ac)}
+.mc-kpi-v.amber{color:var(--amber)}.mc-kpi-v.green{color:var(--green)}
+.mc-kpi-l{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.mc-items{display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto;margin-bottom:10px}
+.mc-item{display:flex;align-items:center;justify-content:space-between;font-size:11px;padding:4px 6px;background:rgba(255,255,255,.03);border-radius:5px}
+.mc-item-nome{flex:1;color:var(--txt2)}
+.mc-item-qtd{color:var(--txt3);margin:0 8px}
+.mc-item-custo{color:var(--teal);font-family:var(--mono);font-weight:700}
+.mc-item-rm{background:none;border:none;color:var(--red);cursor:pointer;padding:2px 4px;font-size:10px;border-radius:3px;transition:background var(--tr);flex-shrink:0}
+.mc-item-rm:hover{background:rgba(255,77,109,.15)}
+.mc-footer{display:flex;gap:6px}
+
+/* ── TOOLBAR / TABLE ─────────────────────────────────────── */
+.bar{background:var(--ink2);border:1px solid var(--line);border-radius:var(--rad);padding:9px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.bl,.br{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.br{margin-left:auto}
+.c{background:var(--ink3);border:1px solid var(--line);color:var(--txt);padding:7px 10px;border-radius:6px;font-size:12px;outline:none;font-family:var(--sans);transition:border-color var(--tr)}
+.c:focus{border-color:var(--ac)}
+select.c{cursor:pointer;min-width:140px}
+input.c{min-width:200px}
+textarea.c{resize:vertical;min-height:60px;width:100%}
+.btn{padding:7px 13px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:all var(--tr);white-space:nowrap;font-family:var(--sans)}
+.btn:hover{filter:brightness(1.14);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-p{background:var(--ac);color:#fff}
+.btn-s{background:var(--ink3);color:var(--txt);border:1px solid var(--line)}
+.btn-s:hover{border-color:var(--line2)}
+.btn-d{background:var(--red);color:#fff}
+.btn-g{background:var(--green);color:#000}
+.btn-a{background:var(--amber);color:#000}
+.btn-b{background:var(--teal);color:#000}
+.sm{padding:3px 8px;font-size:11px}
+.tw{background:var(--ink2);border:1px solid var(--line);border-radius:var(--rad);overflow:auto;max-height:calc(100vh - 300px)}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+thead{position:sticky;top:0;z-index:5;background:var(--ink3)}
+th{padding:9px 11px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--txt3);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid rgba(30,45,64,.5);vertical-align:middle;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:hover td{background:rgba(255,110,180,.02)}
+.erow td{text-align:center!important;padding:36px!important;color:var(--txt3);font-size:13px}
+.bp{display:inline-block;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;text-transform:uppercase;white-space:nowrap;font-family:var(--mono)}
+.b-ok{background:#0a2e1e;color:#4ade80}.b-bad{background:#3d1010;color:#f87171}.b-warn{background:#3d2b08;color:#fcd34d}
+.pag{display:flex;justify-content:space-between;align-items:center;padding:9px 2px 2px;font-size:11px;color:var(--txt3);margin-top:4px}
+.pag-btns{display:flex;gap:5px}
+.pb{padding:4px 11px;border:1px solid var(--line);background:var(--ink3);color:var(--txt);border-radius:5px;cursor:pointer;font-size:11px;transition:all var(--tr)}
+.pb:hover:not(:disabled){border-color:var(--ac);color:var(--ac)}
+.pb:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── MODALS ──────────────────────────────────────────────── */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;justify-content:center;align-items:flex-start;padding:24px 16px;overflow-y:auto;backdrop-filter:blur(3px)}
+.ov.on{display:flex}
+.modal{background:var(--ink2);border:1px solid var(--line2);border-radius:12px;width:100%;max-width:620px;box-shadow:0 22px 60px rgba(0,0,0,.6);animation:mIn .18s ease;margin:auto}
+@keyframes mIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+.mh{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.mt{font-size:14px;font-weight:700;display:flex;align-items:center;gap:9px}
+.mico{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:13px}
+.mx{width:28px;height:28px;background:var(--ink3);border:1px solid var(--line);border-radius:6px;color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all var(--tr)}
+.mx:hover{color:var(--txt);border-color:var(--line2)}
+.mb{padding:18px 20px}
+.mf{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.fg{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+.f1{grid-column:span 1}.f2{grid-column:span 2}.f3{grid-column:span 3}.f4{grid-column:span 4}
+.fgrp{display:flex;flex-direction:column;gap:4px}
+.flbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3)}
+.req{color:var(--red)}
+.info-bar{background:var(--ac-dim);border:1px solid var(--ac-glow);border-radius:7px;padding:10px 14px;margin-bottom:14px;display:flex;gap:20px;flex-wrap:wrap;font-size:11px}
+.ib-item span{color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;font-size:9px;display:block}
+.ib-item strong{font-weight:700;margin-top:1px;display:block}
+.venda-preview{background:var(--ink3);border:1px solid var(--line);border-radius:7px;padding:12px 14px;margin-bottom:14px;display:flex;gap:14px;flex-wrap:wrap}
+.vp-item{flex:1;min-width:90px;text-align:center}
+.vp-v{font-size:18px;font-weight:800;font-family:var(--mono);color:var(--green)}
+.vp-l{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ── LOADING / TOAST ─────────────────────────────────────── */
+.lov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;justify-content:center;align-items:center;flex-direction:column;gap:12px;backdrop-filter:blur(4px)}
+.lov.on{display:flex}
+.spin{width:40px;height:40px;border:3px solid var(--line);border-top-color:var(--ac);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ltxt{color:var(--txt3);font-size:11px;font-family:var(--mono)}
+.toast{position:fixed;bottom:20px;right:20px;z-index:9998;background:var(--ink3);border:1px solid var(--line2);border-radius:9px;padding:10px 14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 8px 30px rgba(0,0,0,.5);animation:tIn .25s ease;max-width:320px}
+@keyframes tIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.toast.ok{border-left:3px solid var(--green)}
+.toast.err{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid var(--teal)}
+
+/* ── VENDA PAGE ──────────────────────────────────────────── */
+.venda-box{background:var(--ink2);border:1px solid var(--line);border-radius:var(--rad);padding:22px;max-width:580px}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sb">
+  <div class="sb-brand">
+    <div class="sb-brand-ico">🧺</div>
+    <div class="sb-brand-name">
+      <strong>Cestas</strong>
+      <span>DIA DAS MÃES</span>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">PRINCIPAL</div>
+    <div class="sb-item on" id="mnDash" onclick="showPage('pgDash','mnDash')">
+      <div class="sb-ico"><i class="fas fa-chart-pie"></i></div>
+      <span class="sb-lbl">Dashboard</span>
+      <span class="sb-badge bteal" id="bdgVendas">0</span>
+    </div>
+    <div class="sb-item" id="mnMod" onclick="showPage('pgMod','mnMod')">
+      <div class="sb-ico"><i class="fas fa-gift"></i></div>
+      <span class="sb-lbl">Modelos de Cestas</span>
+      <span class="sb-badge" id="bdgMod">0</span>
+    </div>
+
+    <div class="sb-sec">OPERAÇÕES</div>
+    <div class="sb-item" id="mnVend" onclick="showPage('pgVend','mnVend','bgreen')">
+      <div class="sb-ico"><i class="fas fa-cash-register"></i></div>
+      <span class="sb-lbl">Registrar Venda</span>
+    </div>
+    <div class="sb-item" id="mnHist" onclick="showPage('pgHist','mnHist','b2')">
+      <div class="sb-ico"><i class="fas fa-history"></i></div>
+      <span class="sb-lbl">Histórico de Vendas</span>
+      <span class="sb-badge b2" id="bdgHist">0</span>
+    </div>
+
+    <div class="sb-sec">ESTOQUE</div>
+    <div class="sb-item" id="mnProd" onclick="showPage('pgProd','mnProd','b2')">
+      <div class="sb-ico"><i class="fas fa-boxes"></i></div>
+      <span class="sb-lbl">Produtos Comprados</span>
+      <span class="sb-badge b2" id="bdgProd">0</span>
+    </div>
+  </nav>
+  <div class="sb-usr">
+    <div class="usr-ava">🎀</div>
+    <div class="usr-info">
+      <div class="usr-nome">Sistema de Cestas</div>
+      <div class="usr-sub">Dia das Mães</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-bc">
+        <span class="tb-bc-r">Cestas</span>
+        <span class="tb-bc-s"><i class="fas fa-chevron-right" style="font-size:8px"></i></span>
+        <span class="tb-bc-c" id="tbBc">Dashboard</span>
+      </div>
+    </div>
+    <div class="tb-r">
+      <div class="tb-counts">
+        <div class="tc"><div class="tc-v" id="hLucro">R$ 0</div><div class="tc-l">Lucro</div></div>
+        <div class="tb-sep"></div>
+        <div class="tc b2"><div class="tc-v" id="hVendido">R$ 0</div><div class="tc-l">Vendido</div></div>
+        <div class="tb-sep"></div>
+        <div class="tc bgreen"><div class="tc-v" id="hCestas">0</div><div class="tc-l">Cestas</div></div>
+      </div>
+      <button class="btn btn-p" onclick="abrirModalVenda()"><i class="fas fa-plus"></i> Nova Venda</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="pg on" id="pgDash">
+      <div class="dash-grid" id="dashCards"></div>
+      <div class="two-col">
+        <div class="panel-box">
+          <div class="ph"><h3>🏆 Ranking de Cestas (lucro)</h3></div>
+          <div class="pb-body"><div class="rank-rows" id="rankRows"></div></div>
+        </div>
+        <div class="panel-box">
+          <div class="ph"><h3>💰 Resumo Financeiro</h3></div>
+          <div class="pb-body"><div class="resumo-rows" id="resumoRows"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MODELOS ── -->
+    <div class="pg" id="pgMod">
+      <div class="bar">
+        <div class="bl"><span style="font-weight:700;font-size:12px;color:var(--ac)"><i class="fas fa-gift" style="margin-right:6px"></i>Modelos de Cestas</span></div>
+        <div class="br">
+          <button class="btn btn-p" onclick="abrirModalModelo()"><i class="fas fa-plus"></i> Novo Modelo</button>
+          <button class="btn btn-s" onclick="init()" title="Recarregar"><i class="fas fa-sync-alt"></i></button>
+        </div>
+      </div>
+      <div class="modelos-grid" id="modelosGrid"></div>
+    </div>
+
+    <!-- ── REGISTRAR VENDA ── -->
+    <div class="pg" id="pgVend">
+      <div class="bar"><div class="bl" style="font-weight:700;font-size:12px;color:var(--green)"><i class="fas fa-cash-register" style="margin-right:6px"></i>Registrar Nova Venda</div></div>
+      <div class="venda-box">
+        <div class="fg" style="margin-bottom:14px">
+          <div class="fgrp f4">
+            <label class="flbl">Modelo de Cesta <span class="req">*</span></label>
+            <select class="c" id="vCesta" style="width:100%" onchange="atualizarPreview()">
+              <option value="">Selecione a cesta</option>
+            </select>
+          </div>
+          <div class="fgrp f2">
+            <label class="flbl">Cliente (opcional)</label>
+            <input type="text" class="c" id="vCliente" placeholder="Nome do cliente" style="width:100%">
+          </div>
+          <div class="fgrp f2">
+            <label class="flbl">Quantidade <span class="req">*</span></label>
+            <input type="number" class="c" id="vQtd" value="1" min="1" style="width:100%" oninput="recalcLucro()">
+          </div>
+        </div>
+        <div class="venda-preview" id="vendaPreview" style="display:none">
+          <div class="vp-item"><div class="vp-v" id="vpCusto">R$ 0</div><div class="vp-l">Custo unitário</div></div>
+          <div class="vp-item"><div class="vp-v" style="color:var(--amber)" id="vpSugerido">R$ 0</div><div class="vp-l">Preço sugerido</div></div>
+          <div class="vp-item"><div class="vp-v" id="vpLucro">R$ 0</div><div class="vp-l">Lucro estimado</div></div>
+        </div>
+        <div class="fg" style="margin-bottom:16px">
+          <div class="fgrp f4">
+            <label class="flbl">Preço de Venda (R$) <span class="req">*</span></label>
+            <input type="number" class="c" id="vPreco" step="0.01" placeholder="0,00" style="width:100%" oninput="recalcLucro()">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-s" onclick="limparFormVenda()"><i class="fas fa-eraser"></i> Limpar</button>
+          <button class="btn btn-g" onclick="salvarVenda()"><i class="fas fa-save"></i> Confirmar Venda</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HISTÓRICO ── -->
+    <div class="pg" id="pgHist">
+      <div class="bar">
+        <div class="bl">
+          <select class="c" id="fHistCesta" onchange="filtrarHist()"><option value="">Todas as cestas</option></select>
+          <input type="text" class="c" id="fHistBusca" placeholder="🔍 Buscar cliente..." oninput="filtrarHist()" style="min-width:180px">
+        </div>
+        <div class="br">
+          <button class="btn btn-s" onclick="init()"><i class="fas fa-sync-alt"></i></button>
+        </div>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>ID</th><th>Data</th><th>Cesta</th><th>Cliente</th><th>Qtd</th><th>Custo</th><th>Preço Venda</th><th>Total</th><th>Lucro</th><th style="text-align:center">Ações</th></tr></thead>
+          <tbody id="tbVendas"><tr><td colspan="10" class="erow"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pag">
+        <span id="pgInfoVend">—</span>
+        <div class="pag-btns">
+          <button class="pb" id="btnPrevV" onclick="irPagV(-1)" disabled><i class="fas fa-chevron-left"></i> Anterior</button>
+          <button class="pb" id="btnNextV" onclick="irPagV(1)" disabled>Próximo <i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PRODUTOS ── -->
+    <div class="pg" id="pgProd">
+      <div class="bar">
+        <div class="bl"><input type="text" class="c" id="fProdBusca" placeholder="🔍 Buscar produto..." oninput="filtrarProd()" style="min-width:200px"></div>
+        <div class="br">
+          <button class="btn btn-a" onclick="abrirModalProduto()"><i class="fas fa-plus"></i> Cadastrar Produto</button>
+          <button class="btn btn-s" onclick="init()"><i class="fas fa-sync-alt"></i></button>
+        </div>
+      </div>
+      <div class="tw" style="max-height:calc(100vh - 250px)">
+        <table>
+          <thead><tr><th>ID</th><th>Produto</th><th>Qtd Comprada</th><th>Valor Total</th><th>Valor Unitário</th><th>Data Compra</th><th style="text-align:center">Ações</th></tr></thead>
+          <tbody id="tbProd"><tr><td colspan="7" class="erow"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pag">
+        <span id="pgInfoProd">—</span>
+        <div class="pag-btns">
+          <button class="pb" id="btnPrevP" onclick="irPagP(-1)" disabled><i class="fas fa-chevron-left"></i> Anterior</button>
+          <button class="pb" id="btnNextP" onclick="irPagP(1)" disabled>Próximo <i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ══════════ MODAL: NOVO PRODUTO ══════════ -->
+<div class="ov" id="ovProd">
+  <div class="modal">
+    <div class="mh"><div class="mt"><div class="mico">📦</div>Cadastrar Produto Comprado</div><button class="mx" onclick="fechar('ovProd')">✕</button></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp f4"><label class="flbl">Nome do Produto <span class="req">*</span></label><input type="text" class="c" id="pNome" placeholder="Ex: Vinho Tinto, Chocolate, Laço Dourado" style="width:100%"></div>
+        <div class="fgrp f2"><label class="flbl">Quantidade Comprada <span class="req">*</span></label><input type="number" class="c" id="pQtd" placeholder="Ex: 10" min="1" style="width:100%" oninput="calcUnit()"></div>
+        <div class="fgrp f2"><label class="flbl">Valor TOTAL Pago (R$) <span class="req">*</span></label><input type="number" class="c" id="pTotal" placeholder="Ex: 150.00" step="0.01" style="width:100%" oninput="calcUnit()"></div>
+        <div class="fgrp f2"><label class="flbl">Valor Unitário (calculado)</label><input type="text" class="c" id="pUnit" readonly style="background:rgba(255,255,255,.03);color:var(--green);font-weight:700"></div>
+        <div class="fgrp f2" style="align-self:flex-end">
+          <div style="background:rgba(0,229,180,.06);border:1px solid rgba(0,229,180,.18);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--txt2)">
+            <i class="fas fa-info-circle" style="color:var(--teal);margin-right:4px"></i>
+            Unitário = total ÷ quantidade
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="fechar('ovProd')">Cancelar</button><button class="btn btn-g" onclick="salvarProduto()"><i class="fas fa-save"></i> Salvar Produto</button></div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: NOVO MODELO ══════════ -->
+<div class="ov" id="ovModelo">
+  <div class="modal">
+    <div class="mh"><div class="mt"><div class="mico">🎁</div>Novo Modelo de Cesta</div><button class="mx" onclick="fechar('ovModelo')">✕</button></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp f3"><label class="flbl">Nome da Cesta <span class="req">*</span></label><input type="text" class="c" id="mNome" placeholder="Ex: Cesta Simples, Cesta Premium" style="width:100%"></div>
+        <div class="fgrp f1"><label class="flbl">Margem (%) <span class="req">*</span></label><input type="number" class="c" id="mMargem" placeholder="120" min="1" style="width:100%"></div>
+        <div class="fgrp f4"><label class="flbl">Descrição</label><input type="text" class="c" id="mDesc" placeholder="Ex: Cesta com chocolates e vinho" style="width:100%"></div>
+        <div class="fgrp f4">
+          <div style="background:var(--ink3);border:1px solid var(--line);border-radius:7px;padding:10px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);margin-bottom:8px">Referência de Margens</div>
+            <div style="display:flex;gap:10px;font-size:11px;flex-wrap:wrap">
+              <span style="background:rgba(34,215,110,.1);color:var(--green);padding:3px 8px;border-radius:5px">Simples → 120%</span>
+              <span style="background:rgba(245,166,35,.1);color:var(--amber);padding:3px 8px;border-radius:5px">Médio → 150%</span>
+              <span style="background:rgba(255,110,180,.1);color:var(--ac);padding:3px 8px;border-radius:5px">Premium → 200%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="fechar('ovModelo')">Cancelar</button><button class="btn btn-g" onclick="salvarModelo()"><i class="fas fa-save"></i> Criar Modelo</button></div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: ADD ITEM AO MODELO ══════════ -->
+<div class="ov" id="ovAddItem">
+  <div class="modal">
+    <div class="mh"><div class="mt"><div class="mico">➕</div>Adicionar Item ao Modelo</div><button class="mx" onclick="fechar('ovAddItem')">✕</button></div>
+    <div class="mb">
+      <div class="info-bar">
+        <div class="ib-item"><span>Cesta</span><strong style="color:var(--ac)" id="aiNomeCesta">—</strong></div>
+        <div class="ib-item"><span>Custo atual</span><strong style="color:var(--green)" id="aiCustoAtual">R$ 0,00</strong></div>
+        <div class="ib-item"><span>Preço sugerido</span><strong style="color:var(--amber)" id="aiPrecoSug">R$ 0,00</strong></div>
+      </div>
+      <div class="fg">
+        <div class="fgrp f3">
+          <label class="flbl">Produto <span class="req">*</span></label>
+          <select class="c" id="aiProduto" style="width:100%" onchange="preencherCustoItem()"><option value="">Selecione um produto</option></select>
+        </div>
+        <div class="fgrp f1">
+          <label class="flbl">Qtd <span class="req">*</span></label>
+          <input type="number" class="c" id="aiQtd" value="1" min="1" style="width:100%" oninput="preencherCustoItem()">
+        </div>
+        <div class="fgrp f2">
+          <label class="flbl">Custo unitário</label>
+          <input type="text" class="c" id="aiCustoUnit" readonly style="background:rgba(255,255,255,.03);color:var(--teal)">
+        </div>
+        <div class="fgrp f2">
+          <label class="flbl">Custo total do item</label>
+          <input type="text" class="c" id="aiCustoTotalItem" readonly style="background:rgba(255,255,255,.03);color:var(--green);font-weight:700">
+        </div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="fechar('ovAddItem')">Cancelar</button><button class="btn btn-p" onclick="salvarItem()"><i class="fas fa-plus"></i> Adicionar Item</button></div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: NOVA VENDA (TOPBAR) ══════════ -->
+<div class="ov" id="ovVenda">
+  <div class="modal">
+    <div class="mh"><div class="mt"><div class="mico" style="background:linear-gradient(135deg,var(--green),var(--teal))">💰</div>Registrar Venda</div><button class="mx" onclick="fechar('ovVenda')">✕</button></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp f4">
+          <label class="flbl">Modelo de Cesta <span class="req">*</span></label>
+          <select class="c" id="mvCesta" style="width:100%" onchange="atualizarPreviewModal()"><option value="">Selecione a cesta</option></select>
+        </div>
+        <div class="fgrp f2"><label class="flbl">Cliente (opcional)</label><input type="text" class="c" id="mvCliente" style="width:100%"></div>
+        <div class="fgrp f2"><label class="flbl">Quantidade <span class="req">*</span></label><input type="number" class="c" id="mvQtd" value="1" min="1" style="width:100%" oninput="atualizarPreviewModal()"></div>
+      </div>
+      <div class="venda-preview" id="previewModal" style="display:none;margin:12px 0">
+        <div class="vp-item"><div class="vp-v" id="mvpCusto">R$ 0</div><div class="vp-l">Custo unitário</div></div>
+        <div class="vp-item"><div class="vp-v" style="color:var(--amber)" id="mvpSugerido">R$ 0</div><div class="vp-l">Preço sugerido</div></div>
+        <div class="vp-item"><div class="vp-v" id="mvpLucro">R$ 0</div><div class="vp-l">Lucro estimado</div></div>
+      </div>
+      <div class="fg">
+        <div class="fgrp f4">
+          <label class="flbl">Preço de Venda (R$) <span class="req">*</span></label>
+          <input type="number" class="c" id="mvPreco" step="0.01" placeholder="0,00" style="width:100%" oninput="recalcLucroModal()">
+        </div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="fechar('ovVenda')">Cancelar</button><button class="btn btn-g" onclick="salvarVendaModal()"><i class="fas fa-save"></i> Confirmar Venda</button></div>
+  </div>
+</div>
+
+<div class="lov" id="lov"><div class="spin"></div><div class="ltxt" id="lovTxt">Carregando...</div></div>
+
+<script src="config.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════════
+var _produtos=[], _modelos=[], _composicao=[], _vendas=[];
+var _filtVend=[], _filtProd=[];
+var _pagV=1, _pagP=1, _pp=25;
+var _cestaCtx=null;
+
+var _pgLabels={
+  pgDash:'Dashboard',
+  pgMod:'Modelos de Cestas',
+  pgVend:'Registrar Venda',
+  pgHist:'Histórico de Vendas',
+  pgProd:'Produtos Comprados'
+};
+
+// ═══════════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════════════════
+function showPage(pgId, menuId, clr) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('on','b2','bgreen','bteal'));
+  document.getElementById(pgId).classList.add('on');
+  const mi = document.getElementById(menuId);
+  if (mi) { mi.classList.add('on'); if (clr) mi.classList.add(clr); }
+  document.getElementById('tbBc').textContent = _pgLabels[pgId] || pgId;
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT — CARREGAR DADOS DO APPS SCRIPT
+// ═══════════════════════════════════════════════════════════
+async function init() {
+  loading('Carregando dados...');
+  try {
+    const r = await cestasApi.carregarDados();
+    unload();
+    if (!r.sucesso) { toast('Erro: ' + r.mensagem, 'err'); return; }
+    _produtos   = r.produtos   || [];
+    _modelos    = r.modelos    || [];
+    _composicao = r.composicao || [];
+    _vendas     = r.vendas     || [];
+    atualizar();
+  } catch(e) {
+    unload();
+    toast('Erro de conexão: ' + e.message, 'err');
+  }
+}
+
+function atualizar() {
+  const totalV = _vendas.reduce((s,v) => s+(v.totalRecebido||0), 0);
+  const totalL = _vendas.reduce((s,v) => s+(v.lucro||0), 0);
+  const totalC = _vendas.reduce((s,v) => s+(v.qtdVendida||0), 0);
+  document.getElementById('hLucro').textContent   = fmtR(totalL);
+  document.getElementById('hVendido').textContent = fmtR(totalV);
+  document.getElementById('hCestas').textContent  = totalC;
+  document.getElementById('bdgVendas').textContent = _vendas.length;
+  document.getElementById('bdgMod').textContent   = _modelos.length;
+  document.getElementById('bdgHist').textContent  = _vendas.length;
+  document.getElementById('bdgProd').textContent  = _produtos.length;
+  buildDropdowns();
+  renderDash();
+  renderModelosGrid();
+  filtrarHist();
+  filtrarProd();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+function renderDash() {
+  const totalV   = _vendas.reduce((s,v) => s+(v.totalRecebido||0), 0);
+  const totalL   = _vendas.reduce((s,v) => s+(v.lucro||0), 0);
+  const totalInv = _produtos.reduce((s,p) => s+(p.valorTotal||0), 0);
+  const totalC   = _vendas.reduce((s,v) => s+(v.qtdVendida||0), 0);
+  const margem   = totalV > 0 ? (totalL/totalV*100) : 0;
+  const roi      = totalInv > 0 ? (totalL/totalInv*100) : 0;
+
+  const cards = [
+    { cls:'c-green',  ico:'📈', lbl:'Lucro Total',     val:fmtR(totalL),         pct:100,               trend: totalL>=0?'up':'bad' },
+    { cls:'c-pink',   ico:'💰', lbl:'Total Vendido',   val:fmtR(totalV),         pct:100,               trend:'up' },
+    { cls:'c-amber',  ico:'🧺', lbl:'Cestas Vendidas', val:totalC,               pct:100,               trend:'' },
+    { cls:'c-purple', ico:'📦', lbl:'Investido',       val:fmtR(totalInv),       pct:100,               trend:'warn' },
+    { cls:'c-teal',   ico:'📊', lbl:'Margem s/ venda', val:margem.toFixed(1)+'%', pct:Math.min(margem,100), trend:margem>=30?'up':margem>=15?'warn':'bad' },
+    { cls:'c-pink',   ico:'🔁', lbl:'ROI s/ custo',    val:roi.toFixed(1)+'%',   pct:Math.min(roi,100), trend:roi>=50?'up':roi>=20?'warn':'bad' }
+  ];
+
+  document.getElementById('dashCards').innerHTML = cards.map(c => {
+    const tH = c.trend ? `<div class="dc-badge ${c.trend}">${c.pct.toFixed(0)}%</div>` : '';
+    return `<div class="dcard ${c.cls}">
+      <div class="dc-top"><div class="dc-ico">${c.ico}</div>${tH}</div>
+      <div class="dc-val">${c.val}</div>
+      <div class="dc-lbl">${c.lbl}</div>
+      <div class="dc-bar"><div class="dc-fill" style="width:${c.pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  // Ranking
+  const res = {};
+  _vendas.forEach(v => {
+    const n = v.nomeCesta || '?';
+    if (!res[n]) res[n] = { qtd:0, total:0, lucro:0 };
+    res[n].qtd   += v.qtdVendida || 0;
+    res[n].total += v.totalRecebido || 0;
+    res[n].lucro += v.lucro || 0;
+  });
+  const lista = Object.entries(res).map(([k,v]) => [k,v.qtd,v.total,v.lucro]).sort((a,b)=>b[3]-a[3]);
+  const maxL = lista.length ? lista[0][3] : 1;
+  document.getElementById('rankRows').innerHTML = lista.slice(0,6).map((r,i) => {
+    const pct = maxL > 0 ? Math.round(r[3]/maxL*100) : 0;
+    return `<div class="rank-row">
+      <div class="rank-num">#${i+1}</div>
+      <div class="rank-name">${esc(r[0])}</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:${pct}%"></div></div>
+      <div class="rank-val">${fmtR(r[3])}</div>
+    </div>`;
+  }).join('') || '<div style="color:var(--txt3);font-size:12px">Nenhuma venda registrada.</div>';
+
+  // Resumo financeiro
+  const itens = [
+    { nome:'Total investido (compras)', val:fmtR(totalInv), cor:'var(--txt2)' },
+    { nome:'Total recebido (vendas)',   val:fmtR(totalV),   cor:'var(--ac)' },
+    { nome:'Lucro líquido',             val:fmtR(totalL),   cor:totalL>=0?'var(--green)':'var(--red)' },
+    { nome:'Cestas cadastradas',        val:_modelos.length, cor:'var(--ac2)' },
+    { nome:'Produtos no estoque',       val:_produtos.length, cor:'var(--amber)' }
+  ];
+  document.getElementById('resumoRows').innerHTML = itens.map(it =>
+    `<div class="resumo-row">
+      <div class="resumo-dot" style="background:${it.cor}"></div>
+      <div class="resumo-name">${it.nome}</div>
+      <div class="resumo-num" style="color:${it.cor}">${it.val}</div>
+    </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODELOS GRID
+// ═══════════════════════════════════════════════════════════
+function renderModelosGrid() {
+  const el = document.getElementById('modelosGrid');
+  if (!_modelos.length) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--txt3);padding:40px;font-size:13px">🎁 Nenhum modelo cadastrado. Crie o primeiro modelo!</div>';
+    return;
+  }
+  el.innerHTML = _modelos.map(m => {
+    const itens = _composicao.filter(c => c.nomeCesta.toLowerCase() === m.nome.toLowerCase());
+    const custo = itens.reduce((s,i) => s+(i.custoTotal||0), 0);
+    const preco = custo * (1 + m.margem/100);
+    const lucro = preco - custo;
+    return `<div class="mc">
+      <div class="mc-hdr">
+        <div class="mc-hdr-l">
+          <div class="mc-ico">🎁</div>
+          <div><div class="mc-nome">${esc(m.nome)}</div><div class="mc-desc">${esc(m.descricao||'—')}</div></div>
+        </div>
+        <div class="mc-margem">+${m.margem}%</div>
+      </div>
+      <div class="mc-body">
+        <div class="mc-kpis">
+          <div class="mc-kpi"><div class="mc-kpi-v">${fmtR(custo)}</div><div class="mc-kpi-l">Custo</div></div>
+          <div class="mc-kpi"><div class="mc-kpi-v amber">${fmtR(preco)}</div><div class="mc-kpi-l">Sugerido</div></div>
+          <div class="mc-kpi"><div class="mc-kpi-v green">${fmtR(lucro)}</div><div class="mc-kpi-l">Lucro/un</div></div>
+        </div>
+        <div class="mc-items">
+          ${itens.length ? itens.map(it => `
+            <div class="mc-item">
+              <span class="mc-item-nome">${esc(it.produto)}</span>
+              <span class="mc-item-qtd">×${it.qtd}</span>
+              <span class="mc-item-custo">${fmtR(it.custoTotal)}</span>
+              <button class="mc-item-rm" onclick="removerItem('${esc(m.nome)}','${esc(it.produto)}')" title="Remover"><i class="fas fa-times"></i></button>
+            </div>`).join('') : '<div style="color:var(--txt3);font-size:11px;padding:4px 0">Nenhum item na composição.</div>'}
+        </div>
+        <div class="mc-footer">
+          <button class="btn btn-p sm" style="flex:1" onclick="abrirAddItem('${esc(m.nome)}')"><i class="fas fa-plus"></i> Add Item</button>
+          <button class="btn btn-d sm" onclick="excluirModelo('${esc(m.nome)}')"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// TABELAS
+// ═══════════════════════════════════════════════════════════
+function filtrarHist() {
+  const cesta = document.getElementById('fHistCesta').value.toLowerCase();
+  const busca = document.getElementById('fHistBusca').value.toLowerCase();
+  _filtVend = _vendas.filter(v => {
+    if (cesta && v.nomeCesta.toLowerCase() !== cesta) return false;
+    if (busca && !(v.cliente||'').toLowerCase().includes(busca) && !v.nomeCesta.toLowerCase().includes(busca)) return false;
+    return true;
+  });
+  _pagV = 1; renderTabVendas();
+}
+function renderTabVendas() {
+  const tb = document.getElementById('tbVendas');
+  const fat = _filtVend.slice((_pagV-1)*_pp, _pagV*_pp);
+  if (!fat.length) { tb.innerHTML='<tr><td colspan="10" class="erow">📭 Nenhuma venda encontrada.</td></tr>'; renderPagV(); return; }
+  tb.innerHTML = fat.map(v => {
+    const lc = v.lucro || 0;
+    return `<tr>
+      <td style="color:var(--txt3);font-family:var(--mono)">${esc(v.id)}</td>
+      <td style="font-size:11px;color:var(--txt3)">${esc(v.data)}</td>
+      <td style="font-weight:700;color:var(--ac)">${esc(v.nomeCesta)}</td>
+      <td>${esc(v.cliente||'—')}</td>
+      <td style="text-align:center">${v.qtdVendida}</td>
+      <td style="color:var(--txt2)">${fmtR(v.custoTotal)}</td>
+      <td style="color:var(--amber)">${fmtR(v.precoVenda)}</td>
+      <td style="color:var(--teal);font-weight:700">${fmtR(v.totalRecebido)}</td>
+      <td><span class="bp ${lc>=0?'b-ok':'b-bad'}">${fmtR(lc)}</span></td>
+      <td style="text-align:center"><button class="btn btn-d sm" onclick="excluirVenda('${v.id}')"><i class="fas fa-trash"></i></button></td>
+    </tr>`;
+  }).join('');
+  renderPagV();
+}
+function renderPagV() {
+  const tot=_filtVend.length, pags=Math.ceil(tot/_pp)||1;
+  const ini=tot===0?0:(_pagV-1)*_pp+1, fim=Math.min(_pagV*_pp,tot);
+  document.getElementById('pgInfoVend').textContent=`Exibindo ${ini}–${fim} de ${tot}`;
+  document.getElementById('btnPrevV').disabled=_pagV<=1;
+  document.getElementById('btnNextV').disabled=_pagV>=pags;
+}
+function irPagV(d) { const p=Math.ceil(_filtVend.length/_pp)||1; _pagV=Math.max(1,Math.min(p,_pagV+d)); renderTabVendas(); }
+
+function filtrarProd() {
+  const busca = document.getElementById('fProdBusca').value.toLowerCase();
+  _filtProd = _produtos.filter(p => !busca || p.nome.toLowerCase().includes(busca));
+  _pagP = 1; renderTabProd();
+}
+function renderTabProd() {
+  const tb = document.getElementById('tbProd');
+  const fat = _filtProd.slice((_pagP-1)*_pp, _pagP*_pp);
+  if (!fat.length) { tb.innerHTML='<tr><td colspan="7" class="erow">📭 Nenhum produto encontrado.</td></tr>'; renderPagP(); return; }
+  tb.innerHTML = fat.map(p =>
+    `<tr>
+      <td style="color:var(--txt3);font-family:var(--mono)">${p.id}</td>
+      <td style="font-weight:700">${esc(p.nome)}</td>
+      <td style="text-align:center">${p.qtdComprada}</td>
+      <td style="color:var(--ac)">${fmtR(p.valorTotal)}</td>
+      <td style="color:var(--green);font-weight:700;font-family:var(--mono)">${fmtR(p.valorUnitario)}</td>
+      <td style="font-size:11px;color:var(--txt3)">${esc(p.dataCompra||'—')}</td>
+      <td style="text-align:center"><button class="btn btn-d sm" onclick="excluirProduto('${p.id}')"><i class="fas fa-trash"></i></button></td>
+    </tr>`
+  ).join('');
+  renderPagP();
+}
+function renderPagP() {
+  const tot=_filtProd.length, pags=Math.ceil(tot/_pp)||1;
+  const ini=tot===0?0:(_pagP-1)*_pp+1, fim=Math.min(_pagP*_pp,tot);
+  document.getElementById('pgInfoProd').textContent=`Exibindo ${ini}–${fim} de ${tot}`;
+  document.getElementById('btnPrevP').disabled=_pagP<=1;
+  document.getElementById('btnNextP').disabled=_pagP>=pags;
+}
+function irPagP(d) { const p=Math.ceil(_filtProd.length/_pp)||1; _pagP=Math.max(1,Math.min(p,_pagP+d)); renderTabProd(); }
+
+// ═══════════════════════════════════════════════════════════
+// DROPDOWNS
+// ═══════════════════════════════════════════════════════════
+function buildDropdowns() {
+  ['vCesta','mvCesta'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    const cur = el.value;
+    el.innerHTML = '<option value="">Selecione a cesta</option>';
+    _modelos.forEach(m => el.innerHTML += `<option value="${esc(m.nome)}">${esc(m.nome)}</option>`);
+    if (cur) el.value = cur;
+  });
+  const fhc = document.getElementById('fHistCesta');
+  if (fhc) {
+    const cur = fhc.value;
+    fhc.innerHTML = '<option value="">Todas as cestas</option>';
+    _modelos.forEach(m => fhc.innerHTML += `<option value="${esc(m.nome)}">${esc(m.nome)}</option>`);
+    if (cur) fhc.value = cur;
+  }
+  const aiP = document.getElementById('aiProduto');
+  if (aiP) {
+    const cur = aiP.value;
+    aiP.innerHTML = '<option value="">Selecione um produto</option>';
+    _produtos.forEach(p => aiP.innerHTML += `<option value="${esc(p.nome)}" data-unit="${p.valorUnitario}">${esc(p.nome)} (${fmtR(p.valorUnitario)}/un)</option>`);
+    if (cur) aiP.value = cur;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS — CÁLCULOS
+// ═══════════════════════════════════════════════════════════
+function custoCesta(nome) {
+  return _composicao.filter(c => c.nomeCesta.toLowerCase()===nome.toLowerCase()).reduce((s,i)=>s+(i.custoTotal||0),0);
+}
+function margemCesta(nome) {
+  const m = _modelos.find(m => m.nome.toLowerCase()===nome.toLowerCase());
+  return m ? m.margem : 120;
+}
+
+// Preview venda (página)
+function atualizarPreview() {
+  const nome = document.getElementById('vCesta').value;
+  if (!nome) { document.getElementById('vendaPreview').style.display='none'; return; }
+  document.getElementById('vendaPreview').style.display='flex';
+  const custo = custoCesta(nome), preco = custo*(1+margemCesta(nome)/100);
+  document.getElementById('vpCusto').textContent    = fmtR(custo);
+  document.getElementById('vpSugerido').textContent = fmtR(preco);
+  document.getElementById('vPreco').value = preco.toFixed(2);
+  recalcLucro();
+}
+function recalcLucro() {
+  const nome=document.getElementById('vCesta').value, qtd=parseInt(document.getElementById('vQtd').value)||1;
+  const preco=parseFloat(document.getElementById('vPreco').value)||0;
+  document.getElementById('vpLucro').textContent = fmtR((preco-custoCesta(nome))*qtd);
+}
+
+// Preview venda (modal)
+function atualizarPreviewModal() {
+  const nome = document.getElementById('mvCesta').value;
+  if (!nome) { document.getElementById('previewModal').style.display='none'; return; }
+  document.getElementById('previewModal').style.display='flex';
+  const custo=custoCesta(nome), preco=custo*(1+margemCesta(nome)/100);
+  document.getElementById('mvpCusto').textContent    = fmtR(custo);
+  document.getElementById('mvpSugerido').textContent = fmtR(preco);
+  document.getElementById('mvPreco').value = preco.toFixed(2);
+  recalcLucroModal();
+}
+function recalcLucroModal() {
+  const nome=document.getElementById('mvCesta').value, qtd=parseInt(document.getElementById('mvQtd').value)||1;
+  const preco=parseFloat(document.getElementById('mvPreco').value)||0;
+  document.getElementById('mvpLucro').textContent = fmtR((preco-custoCesta(nome))*qtd);
+}
+
+// ═══════════════════════════════════════════════════════════
+// AÇÕES — PRODUTO
+// ═══════════════════════════════════════════════════════════
+function abrirModalProduto() {
+  ['pNome','pQtd','pTotal'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('pUnit').value='';
+  document.getElementById('ovProd').classList.add('on');
+}
+function calcUnit() {
+  const qtd=parseFloat(document.getElementById('pQtd').value)||0;
+  const tot=parseFloat(document.getElementById('pTotal').value)||0;
+  document.getElementById('pUnit').value = qtd>0 ? fmtR(tot/qtd) : '—';
+}
+async function salvarProduto() {
+  const nome=document.getElementById('pNome').value.trim();
+  const qtd=document.getElementById('pQtd').value;
+  const total=document.getElementById('pTotal').value;
+  if (!nome||!qtd||!total) { toast('Preencha todos os campos!','err'); return; }
+  loading('Salvando produto...');
+  try {
+    const r = await cestasApi.cadastrarProduto({ nome, qtd, valorTotal:total });
+    unload();
+    if (r.sucesso) { toast(r.mensagem,'ok'); fechar('ovProd'); init(); }
+    else toast(r.mensagem,'err');
+  } catch(e) { unload(); toast('Erro: '+e.message,'err'); }
+}
+async function excluirProduto(id) {
+  if (!confirm('Excluir este produto?')) return;
+  loading('Excluindo...');
+  try {
+    const r = await cestasApi.excluirProduto(id);
+    unload();
+    if (r.sucesso) { toast(r.mensagem,'ok'); init(); } else toast(r.mensagem,'err');
+  } catch(e) { unload(); toast('Erro: '+e.message,'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// AÇÕES — MODELO
+// ═══════════════════════════════════════════════════════════
+function abrirModalModelo() {
+  ['mNome','mMargem','mDesc'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('ovModelo').classList.add('on');
+}
+async function salvarModelo() {
+  const nome=document.getElementById('mNome').value.trim();
+  const margem=document.getElementById('mMargem').value;
+  const descricao=document.getElementById('mDesc').value.trim();
+  if (!nome||!margem) { toast('Nome e margem são obrigatórios!','err'); return; }
+  loading('Criando modelo...');
+  try {
+    const r = await cestasApi.cadastrarModelo({ nome, margem, descricao });
+    unload();
+    if (r.sucesso) { toast(r.mensagem,'ok'); fechar('ovModelo'); init(); }
+    else toast(r.mensagem,'err');
+  } catch(e) { unload(); toast('Erro: '+e.message,'err'); }
+}
+async function excluirModelo(nome) {
+  if (!confirm(`Excluir o modelo "${nome}" e toda a composição?`)) return;
+  loading('Excluindo...');
+  try {
+    const r = await cestasApi.excluirModelo(nome);
+    unload();
+    if (r.sucesso) { toast(r.mensagem,'ok'); init(); } else toast(r.mensagem,'err');
+  } catch(e) { unload(); toast('Erro: '+e.message,'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// AÇÕES — COMPOSIÇÃO
+// ═══════════════════════════════════════════════════════════
+function abrirAddItem(nomeCesta) {
+  _cestaCtx = nomeCesta;
+  document.getElementById('aiNomeCesta').textContent = nomeCesta;
+  const custo = custoCesta(nomeCesta), margem=margemCesta(nomeCesta);
+  document.getElementById('aiCustoAtual').textContent = fmtR(custo);
+  document.getElementById('aiPrecoSug').textContent   = fmtR(custo*(1+margem/100));
+  document.getElementById('aiProduto').value='';
+  document.getElementById('aiQtd').value='1';
+  document.getElementById('aiCustoUnit').value='';
+  document.getElementById('aiCustoTotalItem').value='';
+  buildDropdowns();
+  document.getElementById('ovAddItem').classList.add('on');
+}
+function preencherCustoItem() {
+  const sel=document.getElementById('aiProduto');
+  const opt=sel.options[sel.selectedIndex];
+  const unit=opt&&opt.dataset.unit ? parseFloat(opt.dataset.unit) : 0;
+  const qtd=parseFloat(document.getElementById('aiQtd').value)||0;
+  document.getElementById('aiCustoUnit').value      = unit>0 ? fmtR(unit) : '—';
+  document.getElementById('aiCustoTotalItem').value = unit>0 ? fmtR(unit*qtd) : '—';
+}
+async function salvarItem() {
+  const prod=document.getElementById('aiProduto').value;
+  const qtd=document.getElementById('aiQtd').value;
+  if (!_cestaCtx||!prod||!qtd) { toast('Preencha todos os campos!','err'); return; }
+  loading('Adicionando item...');
+  try {
+    const r = await cestasApi.addItemComposicao({ nomeCesta:_cestaCtx, produto:prod, qtd });
+    unload();
+    if (r.sucesso) { toast(r.mensagem,'ok'); fechar('ovAddItem'); init(); }
+    else toast(r.mensagem,'err');
+  } catch(e) { unload(); toast('Erro: '+e.message,'err'); }
+}
+async function removerItem(nomeCesta, nomeProduto) {
+  if (!confirm(`Remover "${nomeProduto}" da cesta "${nomeCesta}"?`)) return;
+  loading('Removendo...');
+  try {
+    const r = await cestasApi.removerItemComposicao(nomeCesta, nomeProduto);
+    unload();
+    if (r.sucesso) { toast(r.mensagem,'ok'); init(); } else toast(r.mensagem,'err');
+  } catch(e) { unload(); toast('Erro: '+e.message,'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// AÇÕES — VENDA
+// ═══════════════════════════════════════════════════════════
+function limparFormVenda() {
+  document.getElementById('vCesta').value='';
+  document.getElementById('vCliente').value='';
+  document.getElementById('vQtd').value='1';
+  document.getElementById('vPreco').value='';
+  document.getElementById('vendaPreview').style.display='none';
+}
+async function salvarVenda() {
+  const cesta=document.getElementById('vCesta').value;
+  const qtd=document.getElementById('vQtd').value;
+  const preco=document.getElementById('vPreco').value;
+  const cliente=document.getElementById('vCliente').value.trim();
+  if (!cesta||!qtd||!preco) { toast('Preencha cesta, quantidade e preço!','err'); return; }
+  loading('Registrando venda...');
+  try {
+    const r = await cestasApi.registrarVenda({ nomeCesta:cesta, cliente, qtd, precoVenda:preco });
+    unload();
+    if (r.sucesso) { toast(`✅ Venda registrada! Lucro: ${fmtR(r.lucro)}`,'ok'); limparFormVenda(); init(); }
+    else toast(r.mensagem,'err');
+  } catch(e) { unload(); toast('Erro: '+e.message,'err'); }
+}
+
+function abrirModalVenda() {
+  buildDropdowns();
+  ['mvCesta','mvCliente','mvPreco'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('mvQtd').value='1';
+  document.getElementById('previewModal').style.display='none';
+  document.getElementById('ovVenda').classList.add('on');
+}
+async function salvarVendaModal() {
+  const cesta=document.getElementById('mvCesta').value;
+  const qtd=document.getElementById('mvQtd').value;
+  const preco=document.getElementById('mvPreco').value;
+  const cliente=document.getElementById('mvCliente').value.trim();
+  if (!cesta||!qtd||!preco) { toast('Preencha cesta, quantidade e preço!','err'); return; }
+  loading('Registrando venda...');
+  try {
+    const r = await cestasApi.registrarVenda({ nomeCesta:cesta, cliente, qtd, precoVenda:preco });
+    unload();
+    if (r.sucesso) { toast(`✅ Venda! Lucro: ${fmtR(r.lucro)}`,'ok'); fechar('ovVenda'); init(); }
+    else toast(r.mensagem,'err');
+  } catch(e) { unload(); toast('Erro: '+e.message,'err'); }
+}
+
+async function excluirVenda(id) {
+  if (!confirm('Excluir esta venda?')) return;
+  loading('Excluindo...');
+  try {
+    const r = await cestasApi.excluirVenda(id);
+    unload();
+    if (r.sucesso) { toast(r.mensagem,'ok'); init(); } else toast(r.mensagem,'err');
+  } catch(e) { unload(); toast('Erro: '+e.message,'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILITÁRIOS
+// ═══════════════════════════════════════════════════════════
+function fechar(id) { document.getElementById(id).classList.remove('on'); }
+function esc(v) { return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function loading(t) { document.getElementById('lovTxt').textContent=t||'Processando...'; document.getElementById('lov').classList.add('on'); }
+function unload() { document.getElementById('lov').classList.remove('on'); }
+function toast(msg, tipo) {
+  const el=document.createElement('div'); el.className='toast '+(tipo||'info');
+  const ico=tipo==='ok'?'✅':tipo==='err'?'❌':'ℹ️';
+  el.innerHTML=`<span>${ico}</span><span>${esc(msg)}</span>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 4000);
+}
+function fmtR(v) {
+  const n=Number(v)||0;
+  return 'R$ '+n.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+
+// Fechar overlay clicando fora
+document.querySelectorAll('.ov').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('on'); }));
+
+// INICIAR
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
