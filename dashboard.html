@@ -721,10 +721,11 @@ function renderDash(){
   var sorted=_cestas.slice().sort(function(a,b){return parseInt(a.numero)-parseInt(b.numero);});
   document.getElementById('cestaStatusRows').innerHTML=sorted.slice(0,8).map(function(c){
     var st=c.status==='disponivel';
+    var sc=calcCesta(c);
     return '<div class="rank-row">'
       +'<div class="rank-num" style="font-size:12px;color:var(--pink)">'+c.numero+'</div>'
       +'<div class="rank-name">'+esc(c.rotulo||'Cesta '+c.numero)+'</div>'
-      +'<div class="rank-val" style="color:'+(st?'var(--green)':'var(--txt3)')+'">'+fmtR(c.custoTotal)+'</div>'
+      +'<div class="rank-val" style="color:'+(st?'var(--green)':'var(--txt3)')+'">'+fmtR(sc.custoTotal)+'</div>'
       +'<span class="bp '+(st?'b-ok':'b-warn')+'" style="margin-left:8px">'+(st?'DISP':'VEND')+'</span>'
       +'</div>';
   }).join('') || '<div style="color:var(--txt3);font-size:12px;padding:4px 0">Nenhuma cesta cadastrada.</div>';
@@ -746,6 +747,24 @@ function renderDash(){
 }
 
 // ── CESTAS GRID ─────────────────────────────────────────────
+// Recalcula custoTotal e precoSugerido localmente a partir de
+// _composicao + _produtos, ignorando o que vier zerado do backend.
+function calcCesta(c){
+  var itens=_composicao.filter(function(i){return String(i.numeroCesta)===String(c.numero);});
+  var custo=itens.reduce(function(s,it){
+    // tenta usar custoTotal do item; se zero, recalcula via valorUnitario do produto
+    var ct=Number(it.custoTotal)||0;
+    if(!ct){
+      var p=_produtos.find(function(x){return x.nome.toLowerCase()===(it.produto||'').toLowerCase();});
+      ct=p?((p.valorUnitario||0)*(Number(it.qtd)||1)):0;
+    }
+    return s+ct;
+  },0);
+  var margem=parseFloat(c.margem)||120;
+  var preco=custo*(1+margem/100);
+  return {custoTotal:custo, precoSugerido:preco};
+}
+
 function renderCestasGrid(){
   var filtro=document.getElementById('fCestaStatus').value;
   var el=document.getElementById('cestasGrid');
@@ -758,6 +777,10 @@ function renderCestasGrid(){
   el.innerHTML=lista.map(function(c){
     var itens=_composicao.filter(function(i){return String(i.numeroCesta)===String(c.numero);});
     var vend=c.status==='vendida';
+    // Recalcula localmente para não depender do backend
+    var calc=calcCesta(c);
+    var custoTotal=calc.custoTotal;
+    var precoSugerido=calc.precoSugerido;
     return '<div class="cesta-card'+(vend?' vendida':'')+'">'
       +'<div class="cc-hdr">'
       +'<div class="cc-num-wrap">'
@@ -769,9 +792,9 @@ function renderCestasGrid(){
       +'</div>'
       +'<div class="cc-body">'
       +'<div class="cc-kpis">'
-      +'<div class="cc-kpi"><div class="cc-kpi-v">'+fmtR(c.custoTotal)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Custo</div></div>'
-      +'<div class="cc-kpi"><div class="cc-kpi-v" style="color:var(--amber)">'+fmtR(c.precoSugerido)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Preço sugerido</div></div>'
-      +'<div class="cc-kpi"><div class="cc-kpi-v" style="color:var(--green)">'+fmtR(c.precoSugerido-c.custoTotal)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Lucro/un</div></div>'
+      +'<div class="cc-kpi"><div class="cc-kpi-v">'+fmtR(custoTotal)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Custo</div></div>'
+      +'<div class="cc-kpi"><div class="cc-kpi-v" style="color:var(--amber)">'+fmtR(precoSugerido)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Preço sugerido</div></div>'
+      +'<div class="cc-kpi"><div class="cc-kpi-v" style="color:var(--green)">'+fmtR(precoSugerido-custoTotal)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Lucro/un</div></div>'
       +'</div>'
       +'<div class="cc-margem-wrap">'
       +'<span class="cc-margem-lbl">Margem:</span>'
@@ -811,10 +834,11 @@ function renderVendaGrid(){
   }
   el.innerHTML=disponiveis.map(function(c){
     var sel=_vendaSel.indexOf(String(c.numero))>=0;
+    var vc=calcCesta(c);
     return '<div class="csg-item'+(sel?' sel':'')+'" id="csg_'+c.numero+'" onclick="toggleCestaVenda(\''+c.numero+'\')">'
       +'<div class="csg-num">'+c.numero+'</div>'
       +'<div class="csg-rotulo">'+(c.rotulo?esc(c.rotulo):'Cesta '+c.numero)+'</div>'
-      +'<div class="csg-custo">'+fmtR(c.custoTotal)+'</div>'
+      +'<div class="csg-custo">'+fmtR(vc.custoTotal)+'</div>'
       +'<div class="csg-check">'+(sel?'✓':'')+'</div>'
       +'</div>';
   }).join('');
@@ -832,7 +856,7 @@ function atualizarResumoVenda(){
   var custoTotal=0, precoSug=0;
   _vendaSel.forEach(function(num){
     var c=_cestas.find(function(x){return String(x.numero)===String(num);});
-    if(c){custoTotal+=c.custoTotal||0; precoSug+=c.precoSugerido||0;}
+    if(c){var vc=calcCesta(c);custoTotal+=vc.custoTotal;precoSug+=vc.precoSugerido;}
   });
   var preco=parseFloat(document.getElementById('vPreco').value)||0;
   document.getElementById('vrCestas').textContent=_vendaSel.map(function(n){return 'Cesta '+n;}).join(', ');
@@ -1115,8 +1139,9 @@ function abrirAddItem(numero){
   _cestaCtx=String(numero);
   var c=_cestas.find(function(x){return String(x.numero)===String(numero);});
   document.getElementById('aiNumCesta').textContent='Cesta '+numero+(c&&c.rotulo?' — '+c.rotulo:'');
-  document.getElementById('aiCustoAtual').textContent=fmtR(c?c.custoTotal:0);
-  document.getElementById('aiPrecoSug').textContent=fmtR(c?c.precoSugerido:0);
+  var aiCalc=c?calcCesta(c):{custoTotal:0,precoSugerido:0};
+  document.getElementById('aiCustoAtual').textContent=fmtR(aiCalc.custoTotal);
+  document.getElementById('aiPrecoSug').textContent=fmtR(aiCalc.precoSugerido);
   document.getElementById('aiProduto').value='';
   document.getElementById('aiQtd').value='1';
   document.getElementById('aiCustoUnit').value='';
