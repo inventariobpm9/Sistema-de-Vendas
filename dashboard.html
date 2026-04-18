@@ -304,10 +304,155 @@ tr:hover td{background:rgba(255,110,180,.03)}
 .pac-calc strong{color:var(--ac)}
 
 .modal-cesta-wide{max-width:660px}
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVO — MOBILE / TABLET
+══════════════════════════════════════════════════════ */
+
+/* Overlay do drawer mobile */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:49;backdrop-filter:blur(2px)}
+.sb-overlay.on{display:block}
+
+@media (max-width: 768px) {
+
+  /* ── SIDEBAR vira drawer lateral ── */
+  .sb{
+    position:fixed;left:0;top:0;bottom:0;
+    width:260px!important;min-width:260px!important;
+    transform:translateX(-100%);
+    transition:transform var(--trans);
+    z-index:50;
+  }
+  .sb.mob-open{transform:translateX(0)}
+  /* No mobile o collapsed não se aplica — usa mob-open/fechado */
+  .sb.collapsed{width:260px!important;min-width:260px!important}
+  .sb.collapsed .sb-label,.sb.collapsed .sb-section-label,.sb.collapsed .sb-badge,
+  .sb.collapsed .usr-info,.sb.collapsed .sb-brand-name{
+    opacity:1!important;pointer-events:auto!important;width:auto!important;overflow:visible!important
+  }
+  .sb.collapsed .sb-item{justify-content:flex-start!important;padding:0 12px!important}
+  .sb.collapsed .sb-item .sb-ico{margin-right:9px!important}
+  .sb.collapsed .sb-usr{justify-content:flex-start!important}
+
+  /* ── TOPBAR ── */
+  .topbar{padding:0 12px;gap:6px}
+  .tb-kpis{gap:8px;padding:4px 8px}
+  .kpi-v{font-size:12px}
+  /* Oculta botão "Registrar Venda" da topbar — tem na nav inferior */
+  .topbar .btn-g{display:none}
+  /* Mostra botão hamburguer */
+  .sb-toggle{display:none} /* esconde o toggle da sidebar desktop */
+  .mob-ham{
+    display:flex;align-items:center;justify-content:center;
+    width:36px;height:36px;border-radius:8px;
+    background:var(--ink3);border:1px solid var(--line);
+    color:var(--txt2);cursor:pointer;font-size:14px;
+    transition:all var(--trans);flex-shrink:0
+  }
+  .mob-ham:hover{color:var(--pink);border-color:var(--pink)}
+
+  /* ── CONTENT ── */
+  .content{padding:12px;padding-bottom:72px} /* espaço para nav inferior */
+
+  /* ── DASHBOARD CARDS: 2 colunas ── */
+  .dash-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .dc-val{font-size:22px}
+
+  /* ── TWO-COL vira uma coluna ── */
+  .two-col{grid-template-columns:1fr}
+
+  /* ── CESTAS GRID: 1 coluna ── */
+  .cestas-grid{grid-template-columns:1fr}
+
+  /* ── BARRA DE AÇÕES (toolbar) ── */
+  .bar{padding:8px 10px;gap:6px}
+  .bl,.br{gap:5px}
+  input.c{min-width:120px}
+  select.c{min-width:100px}
+
+  /* ── TABELAS: scroll horizontal ── */
+  .tw{max-height:none;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  td,th{font-size:11px;padding:7px 8px}
+
+  /* ── VENDA: painel sem max-width ── */
+  #pgVend > div[style*="max-width"]{max-width:100%!important}
+  .cestas-select-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px}
+
+  /* ── MODAIS: full-screen mobile ── */
+  .ov{padding:0;align-items:flex-end}
+  .modal{
+    border-radius:16px 16px 0 0;
+    max-width:100%!important;
+    margin:0;
+    max-height:92vh;
+    overflow-y:auto;
+  }
+  .mb{padding:14px 16px}
+  .mh{padding:12px 16px}
+  .mf{padding:10px 16px}
+
+  /* ── FORM GRID nos modais: 2 colunas ── */
+  .fg{grid-template-columns:repeat(2,1fr)}
+  .f1,.f2,.f3,.f4{grid-column:span 2}
+
+  /* ── TOAST ── */
+  .toast{left:12px;right:12px;max-width:none;bottom:80px}
+
+  /* ── KPIs do topbar: ocultar labels ── */
+  .kpi-l{display:none}
+  .tb-sep{height:16px}
+
+  /* ── BARRA DE NAVEGAÇÃO INFERIOR ── */
+  .mob-nav{
+    display:flex;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--ink2);border-top:1px solid var(--line);
+    z-index:40;height:58px;
+    box-shadow:0 -4px 20px rgba(0,0,0,.4)
+  }
+  .mob-nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:3px;cursor:pointer;
+    font-size:9px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.4px;color:var(--txt3);
+    transition:all var(--trans);padding:4px 2px;position:relative
+  }
+  .mob-nav-item i{font-size:16px;transition:all var(--trans)}
+  .mob-nav-item.on{color:var(--pink)}
+  .mob-nav-item.on i{transform:scale(1.15)}
+  .mob-nav-item.gr.on{color:var(--green)}
+  .mob-nav-item.am.on{color:var(--amber)}
+  .mob-nav-item.bl.on{color:var(--ac2)}
+  .mob-nav-badge{
+    position:absolute;top:6px;right:calc(50% - 18px);
+    background:var(--pink);color:#fff;
+    font-size:8px;font-weight:700;
+    padding:1px 4px;border-radius:8px;
+    font-family:var(--mono);min-width:14px;text-align:center
+  }
+}
+
+/* ── TABLET: ajustes médios ── */
+@media (min-width:769px) and (max-width:1024px){
+  .dash-grid{grid-template-columns:repeat(3,1fr)}
+  .cestas-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  .sb{width:200px;min-width:200px}
+  .content{padding:14px 16px}
+}
+
+/* ── Desktop: oculta elementos mobile ── */
+@media (min-width:769px){
+  .mob-nav{display:none}
+  .mob-ham{display:none}
+  .sb-overlay{display:none!important}
+}
 </style>
 </head>
 <body>
 <div class="shell">
+
+<!-- OVERLAY MOBILE -->
+<div class="sb-overlay" id="sbOverlay" onclick="closeMobSb()"></div>
 
 <!-- SIDEBAR -->
 <aside class="sb" id="sidebar">
@@ -361,6 +506,7 @@ tr:hover td{background:rgba(255,110,180,.03)}
 <div class="main">
   <div class="topbar">
     <div class="tb-left">
+      <button class="mob-ham" onclick="openMobSb()" title="Menu"><i class="fas fa-bars"></i></button>
       <div class="tb-breadcrumb">
         <span class="tb-bc-root">Cestas</span>
         <span class="tb-bc-sep"><i class="fas fa-chevron-right" style="font-size:8px"></i></span>
@@ -504,7 +650,32 @@ tr:hover td{background:rgba(255,110,180,.03)}
 </div>
 </div>
 
-<!-- MODAL: NOVO PRODUTO -->
+<!-- NAVEGAÇÃO INFERIOR MOBILE -->
+<nav class="mob-nav" id="mobNav">
+  <div class="mob-nav-item on" id="mnMobDash" onclick="pg('pgDash','mnDash');setMobNav('mnMobDash')">
+    <i class="fas fa-chart-pie"></i>
+    <span>Dash</span>
+  </div>
+  <div class="mob-nav-item" id="mnMobCestas" onclick="pg('pgCestas','mnCestas','pink');setMobNav('mnMobCestas')">
+    <i class="fas fa-gift"></i>
+    <span>Cestas</span>
+    <span class="mob-nav-badge" id="mbdgCestas" style="display:none">0</span>
+  </div>
+  <div class="mob-nav-item gr" id="mnMobVend" onclick="pg('pgVend','mnVend','green');setMobNav('mnMobVend')">
+    <i class="fas fa-cash-register"></i>
+    <span>Venda</span>
+  </div>
+  <div class="mob-nav-item bl" id="mnMobHist" onclick="pg('pgHist','mnHist','blue');setMobNav('mnMobHist')">
+    <i class="fas fa-history"></i>
+    <span>Hist.</span>
+    <span class="mob-nav-badge" id="mbdgVend" style="display:none">0</span>
+  </div>
+  <div class="mob-nav-item am" id="mnMobProd" onclick="pg('pgProd','mnProd','amber');setMobNav('mnMobProd')">
+    <i class="fas fa-boxes"></i>
+    <span>Estoque</span>
+    <span class="mob-nav-badge" id="mbdgProd" style="display:none">0</span>
+  </div>
+</nav>
 <div class="ov" id="ovProd">
   <div class="modal">
     <div class="mh"><div class="mt"><div class="mico">📦</div> Cadastrar Produto Comprado</div><button class="mx" onclick="fechar('ovProd')">✕</button></div>
@@ -643,6 +814,26 @@ function toggleSb(){
   document.getElementById('sidebar').classList.toggle('collapsed',_sbC);
 }
 
+// ── MOBILE SIDEBAR ───────────────────────────────────────────
+function openMobSb(){
+  document.getElementById('sidebar').classList.add('mob-open');
+  document.getElementById('sbOverlay').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeMobSb(){
+  document.getElementById('sidebar').classList.remove('mob-open');
+  document.getElementById('sbOverlay').classList.remove('on');
+  document.body.style.overflow='';
+}
+
+// ── MOB NAV: ativa item correto ──────────────────────────────
+function setMobNav(activeId){
+  document.querySelectorAll('.mob-nav-item').forEach(function(el){el.classList.remove('on');});
+  var el=document.getElementById(activeId);
+  if(el) el.classList.add('on');
+  closeMobSb();
+}
+
 // ── NAVEGAÇÃO ────────────────────────────────────────────────
 var _pgMap={pgDash:'Dashboard',pgCestas:'Minhas Cestas',pgVend:'Registrar Venda',pgHist:'Vendas Realizadas',pgProd:'Produtos Comprados'};
 function pg(id,menuId,clr){
@@ -654,6 +845,8 @@ function pg(id,menuId,clr){
   document.getElementById('tbBC').textContent=_pgMap[id]||id;
   if(id==='pgDash') renderDash();
   if(id==='pgVend') renderVendaGrid();
+  // Fecha drawer mobile ao navegar
+  closeMobSb();
 }
 
 // ── INIT ────────────────────────────────────────────────────
@@ -683,6 +876,13 @@ function atualizar(){
   document.getElementById('hVendido').textContent  = fmtR(totalV);
   document.getElementById('hLucro').textContent    = fmtR(totalL);
   document.getElementById('hDisp').textContent     = disp+'/'+total;
+  // badges mob-nav
+  var mbC=document.getElementById('mbdgCestas');
+  var mbV=document.getElementById('mbdgVend');
+  var mbP=document.getElementById('mbdgProd');
+  if(mbC){mbC.textContent=total;mbC.style.display=total>0?'':'none';}
+  if(mbV){mbV.textContent=_vendas.length;mbV.style.display=_vendas.length>0?'':'none';}
+  if(mbP){mbP.textContent=_produtos.length;mbP.style.display=_produtos.length>0?'':'none';}
   renderDash();
   renderCestasGrid();
   renderVendaGrid();
@@ -721,11 +921,10 @@ function renderDash(){
   var sorted=_cestas.slice().sort(function(a,b){return parseInt(a.numero)-parseInt(b.numero);});
   document.getElementById('cestaStatusRows').innerHTML=sorted.slice(0,8).map(function(c){
     var st=c.status==='disponivel';
-    var sc=calcCesta(c);
     return '<div class="rank-row">'
       +'<div class="rank-num" style="font-size:12px;color:var(--pink)">'+c.numero+'</div>'
       +'<div class="rank-name">'+esc(c.rotulo||'Cesta '+c.numero)+'</div>'
-      +'<div class="rank-val" style="color:'+(st?'var(--green)':'var(--txt3)')+'">'+fmtR(sc.custoTotal)+'</div>'
+      +'<div class="rank-val" style="color:'+(st?'var(--green)':'var(--txt3)')+'">'+fmtR(c.custoTotal)+'</div>'
       +'<span class="bp '+(st?'b-ok':'b-warn')+'" style="margin-left:8px">'+(st?'DISP':'VEND')+'</span>'
       +'</div>';
   }).join('') || '<div style="color:var(--txt3);font-size:12px;padding:4px 0">Nenhuma cesta cadastrada.</div>';
@@ -747,24 +946,6 @@ function renderDash(){
 }
 
 // ── CESTAS GRID ─────────────────────────────────────────────
-// Recalcula custoTotal e precoSugerido localmente a partir de
-// _composicao + _produtos, ignorando o que vier zerado do backend.
-function calcCesta(c){
-  var itens=_composicao.filter(function(i){return String(i.numeroCesta)===String(c.numero);});
-  var custo=itens.reduce(function(s,it){
-    // tenta usar custoTotal do item; se zero, recalcula via valorUnitario do produto
-    var ct=Number(it.custoTotal)||0;
-    if(!ct){
-      var p=_produtos.find(function(x){return x.nome.toLowerCase()===(it.produto||'').toLowerCase();});
-      ct=p?((p.valorUnitario||0)*(Number(it.qtd)||1)):0;
-    }
-    return s+ct;
-  },0);
-  var margem=parseFloat(c.margem)||120;
-  var preco=custo*(1+margem/100);
-  return {custoTotal:custo, precoSugerido:preco};
-}
-
 function renderCestasGrid(){
   var filtro=document.getElementById('fCestaStatus').value;
   var el=document.getElementById('cestasGrid');
@@ -777,10 +958,6 @@ function renderCestasGrid(){
   el.innerHTML=lista.map(function(c){
     var itens=_composicao.filter(function(i){return String(i.numeroCesta)===String(c.numero);});
     var vend=c.status==='vendida';
-    // Recalcula localmente para não depender do backend
-    var calc=calcCesta(c);
-    var custoTotal=calc.custoTotal;
-    var precoSugerido=calc.precoSugerido;
     return '<div class="cesta-card'+(vend?' vendida':'')+'">'
       +'<div class="cc-hdr">'
       +'<div class="cc-num-wrap">'
@@ -792,9 +969,9 @@ function renderCestasGrid(){
       +'</div>'
       +'<div class="cc-body">'
       +'<div class="cc-kpis">'
-      +'<div class="cc-kpi"><div class="cc-kpi-v">'+fmtR(custoTotal)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Custo</div></div>'
-      +'<div class="cc-kpi"><div class="cc-kpi-v" style="color:var(--amber)">'+fmtR(precoSugerido)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Preço sugerido</div></div>'
-      +'<div class="cc-kpi"><div class="cc-kpi-v" style="color:var(--green)">'+fmtR(precoSugerido-custoTotal)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Lucro/un</div></div>'
+      +'<div class="cc-kpi"><div class="cc-kpi-v">'+fmtR(c.custoTotal)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Custo</div></div>'
+      +'<div class="cc-kpi"><div class="cc-kpi-v" style="color:var(--amber)">'+fmtR(c.precoSugerido)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Preço sugerido</div></div>'
+      +'<div class="cc-kpi"><div class="cc-kpi-v" style="color:var(--green)">'+fmtR(c.precoSugerido-c.custoTotal)+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Lucro/un</div></div>'
       +'</div>'
       +'<div class="cc-margem-wrap">'
       +'<span class="cc-margem-lbl">Margem:</span>'
@@ -834,11 +1011,10 @@ function renderVendaGrid(){
   }
   el.innerHTML=disponiveis.map(function(c){
     var sel=_vendaSel.indexOf(String(c.numero))>=0;
-    var vc=calcCesta(c);
     return '<div class="csg-item'+(sel?' sel':'')+'" id="csg_'+c.numero+'" onclick="toggleCestaVenda(\''+c.numero+'\')">'
       +'<div class="csg-num">'+c.numero+'</div>'
       +'<div class="csg-rotulo">'+(c.rotulo?esc(c.rotulo):'Cesta '+c.numero)+'</div>'
-      +'<div class="csg-custo">'+fmtR(vc.custoTotal)+'</div>'
+      +'<div class="csg-custo">'+fmtR(c.custoTotal)+'</div>'
       +'<div class="csg-check">'+(sel?'✓':'')+'</div>'
       +'</div>';
   }).join('');
@@ -856,7 +1032,7 @@ function atualizarResumoVenda(){
   var custoTotal=0, precoSug=0;
   _vendaSel.forEach(function(num){
     var c=_cestas.find(function(x){return String(x.numero)===String(num);});
-    if(c){var vc=calcCesta(c);custoTotal+=vc.custoTotal;precoSug+=vc.precoSugerido;}
+    if(c){custoTotal+=c.custoTotal||0; precoSug+=c.precoSugerido||0;}
   });
   var preco=parseFloat(document.getElementById('vPreco').value)||0;
   document.getElementById('vrCestas').textContent=_vendaSel.map(function(n){return 'Cesta '+n;}).join(', ');
@@ -1139,9 +1315,8 @@ function abrirAddItem(numero){
   _cestaCtx=String(numero);
   var c=_cestas.find(function(x){return String(x.numero)===String(numero);});
   document.getElementById('aiNumCesta').textContent='Cesta '+numero+(c&&c.rotulo?' — '+c.rotulo:'');
-  var aiCalc=c?calcCesta(c):{custoTotal:0,precoSugerido:0};
-  document.getElementById('aiCustoAtual').textContent=fmtR(aiCalc.custoTotal);
-  document.getElementById('aiPrecoSug').textContent=fmtR(aiCalc.precoSugerido);
+  document.getElementById('aiCustoAtual').textContent=fmtR(c?c.custoTotal:0);
+  document.getElementById('aiPrecoSug').textContent=fmtR(c?c.precoSugerido:0);
   document.getElementById('aiProduto').value='';
   document.getElementById('aiQtd').value='1';
   document.getElementById('aiCustoUnit').value='';
