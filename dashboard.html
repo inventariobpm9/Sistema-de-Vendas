@@ -252,6 +252,31 @@ tr:hover td{background:rgba(255,110,180,.03)}
 .b-ok{background:#0a2e1e;color:#4ade80}.b-warn{background:#3d2b08;color:#fcd34d}.b-bad{background:#3d1010;color:#f87171}
 .empty-state{text-align:center;padding:48px;color:var(--txt3);font-size:13px;grid-column:1/-1}
 .empty-state i{font-size:32px;display:block;margin-bottom:10px;opacity:.4}
+
+/* CHECKLIST DE PRODUTOS NO MODAL */
+.prod-checklist{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto;padding-right:2px}
+.pc-row{display:grid;grid-template-columns:18px 1fr 90px 90px;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:7px;border:1px solid var(--line);background:var(--ink3);
+  transition:border-color var(--trans),background var(--trans);cursor:pointer}
+.pc-row:hover{border-color:var(--line2);background:var(--ink4)}
+.pc-row.checked{border-color:rgba(255,110,180,.35);background:rgba(255,110,180,.06)}
+.pc-chk{width:16px;height:16px;border-radius:4px;border:2px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;transition:all var(--trans);pointer-events:none}
+.pc-row.checked .pc-chk{background:var(--pink);border-color:var(--pink);color:#fff}
+.pc-nome{font-size:12px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-unit{font-size:10px;color:var(--txt3);margin-top:1px;font-family:var(--mono)}
+.pc-qtd-wrap{display:flex;align-items:center;gap:4px}
+.pc-qtd-btn{width:20px;height:20px;border-radius:4px;border:1px solid var(--line);background:var(--ink2);color:var(--txt2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all var(--trans);flex-shrink:0;line-height:1}
+.pc-qtd-btn:hover{border-color:var(--pink);color:var(--pink)}
+.pc-qtd-inp{width:36px;text-align:center;background:var(--ink2);border:1px solid var(--line);color:var(--txt);border-radius:4px;font-size:12px;font-family:var(--mono);padding:2px 0;outline:none}
+.pc-qtd-inp:focus{border-color:var(--pink)}
+.pc-subtotal{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--ac);text-align:right}
+.pc-subtotal.zero{color:var(--txt3)}
+.modal-wide{max-width:680px}
+.cesta-custo-preview{display:flex;gap:10px;padding:10px 14px;background:rgba(0,229,180,.06);border:1px solid rgba(0,229,180,.15);border-radius:7px;margin-bottom:14px}
+.ccp-item{flex:1;text-align:center}
+.ccp-v{font-size:16px;font-weight:800;font-family:var(--mono);color:var(--ac)}
+.ccp-l{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.ccp-v.pink{color:var(--pink)}.ccp-v.amber{color:var(--amber)}.ccp-v.green{color:var(--green)}
 </style>
 </head>
 <body>
@@ -475,37 +500,68 @@ tr:hover td{background:rgba(255,110,180,.03)}
 
 <!-- MODAL: NOVA CESTA -->
 <div class="ov" id="ovCesta">
-  <div class="modal">
-    <div class="mh"><div class="mt"><div class="mico">🧺</div> Nova Cesta</div><button class="mx" onclick="fechar('ovCesta')">✕</button></div>
+  <div class="modal modal-wide">
+    <div class="mh">
+      <div class="mt"><div class="mico">🧺</div> Nova Cesta</div>
+      <button class="mx" onclick="fechar('ovCesta')">✕</button>
+    </div>
     <div class="mb">
-      <div style="background:rgba(255,110,180,.06);border:1px solid rgba(255,110,180,.2);border-radius:7px;padding:10px 13px;margin-bottom:14px;font-size:12px">
-        <i class="fas fa-magic" style="color:var(--pink);margin-right:6px"></i>
-        O número da cesta é gerado automaticamente em sequência (Cesta 01, 02, 03...).
-      </div>
-      <div class="fg">
-        <div class="fgrp f4">
+
+      <!-- Linha 1: info + campos básicos -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div class="fgrp">
           <label class="flbl">Rótulo / Apelido (opcional)</label>
           <input type="text" class="c" id="cRotulo" placeholder="Ex: Cesta Especial para a Ana" style="width:100%">
         </div>
-        <div class="fgrp f4">
+        <div class="fgrp">
           <label class="flbl">Observação (opcional)</label>
           <input type="text" class="c" id="cObs" placeholder="Ex: Chocolates + Vinho + Laço" style="width:100%">
         </div>
-        <div class="fgrp f2">
+        <div class="fgrp">
           <label class="flbl">Margem de Venda (%) <span class="req">*</span></label>
-          <input type="number" class="c" id="cMargem" placeholder="120" value="120" min="1" style="width:100%">
+          <input type="number" class="c" id="cMargem" placeholder="120" value="120" min="1" style="width:100%" oninput="recalcPreviewCesta()">
         </div>
-        <div class="fgrp f2" style="align-self:flex-end">
-          <div style="background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:9px 10px;font-size:11px">
-            <div style="color:var(--txt3);margin-bottom:5px;font-size:10px">REFERÊNCIA</div>
-            <span style="background:rgba(34,215,110,.1);color:var(--green);padding:2px 7px;border-radius:4px;margin-right:4px;font-size:10px">Simples 120%</span>
-            <span style="background:rgba(245,166,35,.1);color:var(--amber);padding:2px 7px;border-radius:4px;margin-right:4px;font-size:10px">Médio 150%</span>
-            <span style="background:rgba(255,110,180,.1);color:var(--pink);padding:2px 7px;border-radius:4px;font-size:10px">Premium 200%</span>
+        <div style="display:flex;align-items:flex-end">
+          <div style="background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:7px 10px;font-size:11px;width:100%">
+            <div style="color:var(--txt3);margin-bottom:4px;font-size:10px">REFERÊNCIA DE MARGEM</div>
+            <span style="background:rgba(34,215,110,.1);color:var(--green);padding:2px 6px;border-radius:4px;margin-right:3px;font-size:10px">120% Simples</span>
+            <span style="background:rgba(245,166,35,.1);color:var(--amber);padding:2px 6px;border-radius:4px;margin-right:3px;font-size:10px">150% Médio</span>
+            <span style="background:rgba(255,110,180,.1);color:var(--pink);padding:2px 6px;border-radius:4px;font-size:10px">200% Premium</span>
           </div>
         </div>
       </div>
+
+      <!-- Preview de custo em tempo real -->
+      <div class="cesta-custo-preview" id="ccPreview">
+        <div class="ccp-item"><div class="ccp-v" id="ccpCusto">R$ 0,00</div><div class="ccp-l">Custo da Cesta</div></div>
+        <div class="ccp-item"><div class="ccp-v amber" id="ccpPreco">R$ 0,00</div><div class="ccp-l">Preço Sugerido</div></div>
+        <div class="ccp-item"><div class="ccp-v green" id="ccpLucro">R$ 0,00</div><div class="ccp-l">Lucro Estimado</div></div>
+        <div class="ccp-item"><div class="ccp-v pink" id="ccpItens">0 itens</div><div class="ccp-l">Selecionados</div></div>
+      </div>
+
+      <!-- Checklist de produtos -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3)">
+          <i class="fas fa-check-square" style="color:var(--pink);margin-right:5px"></i>Selecione os produtos e quantidades
+        </div>
+        <input type="text" class="c" id="cBuscaProd" placeholder="🔍 filtrar produtos..." oninput="filtrarChecklistProd()" style="min-width:0;width:190px;padding:4px 8px;font-size:11px">
+      </div>
+
+      <div class="prod-checklist" id="prodChecklist">
+        <div style="color:var(--txt3);font-size:12px;text-align:center;padding:24px">
+          <i class="fas fa-spinner fa-spin"></i> Carregando produtos...
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:5px">
+        <i class="fas fa-info-circle" style="margin-right:3px"></i>
+        Clique no produto para marcar/desmarcar. Ajuste a quantidade no campo. O custo é calculado automaticamente.
+        Você ainda pode adicionar ou remover produtos depois, pelo card da cesta.
+      </div>
     </div>
-    <div class="mf"><button class="btn btn-s" onclick="fechar('ovCesta')">Cancelar</button><button class="btn btn-p" onclick="salvarCesta()"><i class="fas fa-plus"></i> Criar Cesta</button></div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="fechar('ovCesta')">Cancelar</button>
+      <button class="btn btn-p" onclick="salvarCesta()"><i class="fas fa-plus"></i> Criar Cesta</button>
+    </div>
   </div>
 </div>
 
@@ -821,18 +877,144 @@ function abrirModalCesta(){
   document.getElementById('cRotulo').value='';
   document.getElementById('cObs').value='';
   document.getElementById('cMargem').value='120';
+  document.getElementById('cBuscaProd').value='';
+  renderChecklistProd();
+  recalcPreviewCesta();
   document.getElementById('ovCesta').classList.add('on');
 }
+
+function renderChecklistProd(filtro){
+  var el=document.getElementById('prodChecklist');
+  var lista=_produtos.slice();
+  if(filtro) lista=lista.filter(function(p){return p.nome.toLowerCase().includes(filtro.toLowerCase());});
+  if(!lista.length){
+    el.innerHTML='<div style="color:var(--txt3);font-size:12px;text-align:center;padding:20px">'
+      +(filtro?'Nenhum produto encontrado para "'+esc(filtro)+'".'
+              :'Nenhum produto cadastrado. <br>Vá em <strong>Produtos Comprados</strong> e cadastre primeiro.')
+      +'</div>';
+    return;
+  }
+  el.innerHTML=lista.map(function(p){
+    var id='ck_'+p.nome.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+    return '<div class="pc-row" id="row_'+id+'" onclick="toggleProdCheck(\''+id+'\',\''+esc(p.nome)+'\','+p.valorUnitario+')">'
+      +'<div class="pc-chk" id="chk_'+id+'"></div>'
+      +'<div>'
+        +'<div class="pc-nome">'+esc(p.nome)+'</div>'
+        +'<div class="pc-unit">'+fmtR(p.valorUnitario)+' / unidade</div>'
+      +'</div>'
+      +'<div class="pc-qtd-wrap" onclick="event.stopPropagation()">'
+        +'<button class="pc-qtd-btn" onclick="stepQtd(\''+id+'\',\''+esc(p.nome)+'\','+p.valorUnitario+',-1)">−</button>'
+        +'<input class="pc-qtd-inp" type="number" id="qtd_'+id+'" value="1" min="1" max="99"'
+          +' oninput="onQtdInput(\''+id+'\',\''+esc(p.nome)+'\','+p.valorUnitario+')">'
+        +'<button class="pc-qtd-btn" onclick="stepQtd(\''+id+'\',\''+esc(p.nome)+'\','+p.valorUnitario+',1)">+</button>'
+      +'</div>'
+      +'<div class="pc-subtotal zero" id="sub_'+id+'">—</div>'
+    +'</div>';
+  }).join('');
+}
+
+function filtrarChecklistProd(){
+  var f=document.getElementById('cBuscaProd').value;
+  renderChecklistProd(f);
+}
+
+// Mapa: nome do produto → {checked, qtd, unitario}
+var _checklistState={};
+
+function toggleProdCheck(id,nome,unit){
+  if(!_checklistState[nome]) _checklistState[nome]={checked:false,qtd:1,unitario:unit};
+  _checklistState[nome].checked=!_checklistState[nome].checked;
+  var row=document.getElementById('row_'+id);
+  var chk=document.getElementById('chk_'+id);
+  var sub=document.getElementById('sub_'+id);
+  if(!row||!chk||!sub) return;
+  if(_checklistState[nome].checked){
+    row.classList.add('checked');
+    chk.innerHTML='✓';
+    var qtd=parseInt(document.getElementById('qtd_'+id).value)||1;
+    _checklistState[nome].qtd=qtd;
+    sub.textContent=fmtR(unit*qtd);
+    sub.classList.remove('zero');
+  } else {
+    row.classList.remove('checked');
+    chk.innerHTML='';
+    sub.textContent='—';
+    sub.classList.add('zero');
+  }
+  recalcPreviewCesta();
+}
+
+function onQtdInput(id,nome,unit){
+  var inp=document.getElementById('qtd_'+id);
+  var qtd=parseInt(inp.value)||1;
+  if(qtd<1){qtd=1;inp.value=1;}
+  if(_checklistState[nome]) _checklistState[nome].qtd=qtd;
+  var sub=document.getElementById('sub_'+id);
+  if(sub&&_checklistState[nome]&&_checklistState[nome].checked){
+    sub.textContent=fmtR(unit*qtd);
+  }
+  recalcPreviewCesta();
+}
+
+function stepQtd(id,nome,unit,delta){
+  var inp=document.getElementById('qtd_'+id);
+  var qtd=Math.max(1,(parseInt(inp.value)||1)+delta);
+  inp.value=qtd;
+  onQtdInput(id,nome,unit);
+  // auto-check ao incrementar
+  if(delta>0&&(!_checklistState[nome]||!_checklistState[nome].checked)){
+    toggleProdCheck(id,nome,unit);
+  }
+}
+
+function recalcPreviewCesta(){
+  var custo=0, itens=0;
+  Object.keys(_checklistState).forEach(function(nome){
+    var s=_checklistState[nome];
+    if(s.checked){custo+=s.unitario*s.qtd;itens++;}
+  });
+  var margem=parseFloat(document.getElementById('cMargem').value)||120;
+  var preco=custo*(1+margem/100);
+  var lucro=preco-custo;
+  document.getElementById('ccpCusto').textContent=fmtR(custo);
+  document.getElementById('ccpPreco').textContent=fmtR(preco);
+  document.getElementById('ccpLucro').textContent=fmtR(lucro);
+  document.getElementById('ccpItens').textContent=itens+' item'+(itens!==1?'s':'');
+}
+
 function salvarCesta(){
   var margem=document.getElementById('cMargem').value;
   if(!margem){toast('Informe a margem de venda!','err');return;}
+
+  // Montar lista de itens selecionados
+  var itensSel=[];
+  Object.keys(_checklistState).forEach(function(nome){
+    var s=_checklistState[nome];
+    if(s.checked&&s.qtd>0) itensSel.push({produto:nome,qtd:s.qtd});
+  });
+
   loading('Criando cesta...');
   cestasApi.criarCesta({
     rotulo:     document.getElementById('cRotulo').value.trim(),
     observacao: document.getElementById('cObs').value.trim(),
     margem:     margem
   })
-  .then(function(r){unload();if(r.sucesso){toast(r.mensagem,'ok');fechar('ovCesta');init();}else toast(r.mensagem,'err');})
+  .then(function(r){
+    if(!r.sucesso){unload();toast(r.mensagem,'err');return;}
+    var numero=r.numero;
+    // Salvar itens em sequência, se houver
+    if(!itensSel.length){unload();toast(r.mensagem,'ok');fechar('ovCesta');_checklistState={};init();return;}
+    var promises=itensSel.map(function(it){
+      return cestasApi.addItemCesta({numeroCesta:numero,produto:it.produto,qtd:it.qtd});
+    });
+    return Promise.all(promises).then(function(){
+      unload();
+      toast('Cesta '+numero+' criada com '+itensSel.length+' produto(s)!','ok');
+      fechar('ovCesta');
+      _checklistState={};
+      init();
+    });
+  })
   .catch(function(e){unload();toast('Erro: '+e,'err');});
 }
 function excluirCesta(numero){
