@@ -733,6 +733,13 @@ tr:hover td{background:rgba(255,110,180,.03)}
             <span style="background:rgba(255,110,180,.1);color:var(--pink);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer" onclick="document.getElementById('cMargem').value=200;recalcPreviewCesta()">Premium 200%</span>
           </div>
         </div>
+        <div class="fgrp" style="grid-column:span 2">
+          <label class="flbl"><i class="fas fa-camera" style="color:var(--pink);margin-right:4px"></i>Foto da Cesta (URL pública) <span style="color:var(--txt3);font-weight:400;font-size:9px;text-transform:none;letter-spacing:0"> — aparece na loja</span></label>
+          <input type="url" class="c" id="cFoto" placeholder="https://drive.google.com/uc?id=..." style="width:100%" oninput="previewFotoCesta()">
+          <div id="cFotoPreview" style="display:none;margin-top:6px;border-radius:8px;overflow:hidden;border:1px solid var(--line);max-height:120px">
+            <img id="cFotoImg" src="" alt="Preview" style="width:100%;max-height:120px;object-fit:cover;display:block">
+          </div>
+        </div>
       </div>
 
       <!-- Preview de custo em tempo real -->
@@ -790,6 +797,31 @@ tr:hover td{background:rgba(255,110,180,.03)}
       </div>
     </div>
     <div class="mf"><button class="btn btn-s" onclick="fechar('ovAddItem')">Cancelar</button><button class="btn btn-p" onclick="salvarItemCesta()"><i class="fas fa-plus"></i> Adicionar Item</button></div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR FOTO DA CESTA -->
+<div class="ov" id="ovFoto">
+  <div class="modal">
+    <div class="mh"><div class="mt"><div class="mico">📷</div> Foto da Cesta</div><button class="mx" onclick="fechar('ovFoto')">✕</button></div>
+    <div class="mb">
+      <div style="background:var(--ink3);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font-size:11px;color:var(--txt2);margin-bottom:14px">
+        <i class="fas fa-info-circle" style="color:var(--ac2);margin-right:5px"></i>
+        Cole o link público da imagem. No Google Drive: clique com o botão direito → <strong>Compartilhar → Copiar link</strong>, depois substitua <code style="color:var(--pink)">/d/ID/view</code> por <code style="color:var(--green)">/uc?id=ID</code>.
+      </div>
+      <div class="fgrp">
+        <label class="flbl">URL da Foto <span style="color:var(--txt3);font-weight:400;font-size:9px;text-transform:none;letter-spacing:0">(Google Drive, Imgur, etc.)</span></label>
+        <input type="url" class="c" id="fotoUrl" placeholder="https://drive.google.com/uc?id=..." style="width:100%" oninput="previewFotoEdit()">
+      </div>
+      <div id="fotoEditPreview" style="display:none;margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid var(--line);max-height:160px">
+        <img id="fotoEditImg" src="" alt="Preview" style="width:100%;max-height:160px;object-fit:cover;display:block">
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="fechar('ovFoto')">Cancelar</button>
+      <button class="btn btn-d sm" onclick="salvarFotoCesta('')" style="margin-right:auto"><i class="fas fa-times"></i> Remover foto</button>
+      <button class="btn btn-p" onclick="salvarFotoCesta(document.getElementById('fotoUrl').value.trim())"><i class="fas fa-save"></i> Salvar Foto</button>
+    </div>
   </div>
 </div>
 
@@ -978,7 +1010,14 @@ function renderCestasGrid(){
     var calc=calcCesta(c);
     var custoTotal=calc.custoTotal;
     var precoSugerido=calc.precoSugerido;
+    // miniatura da foto
+    var fotoHtml=c.fotoUrl
+      ?'<div style="width:100%;height:120px;overflow:hidden;border-bottom:1px solid var(--line)">'
+        +'<img src="'+esc(c.fotoUrl)+'" alt="foto" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.style.display=\'none\'">'
+        +'</div>'
+      :'';
     return '<div class="cesta-card'+(vend?' vendida':'')+'">'
+      + fotoHtml
       +'<div class="cc-hdr">'
       +'<div class="cc-num-wrap">'
       +'<div class="cc-num">'+c.numero+'</div>'
@@ -1013,6 +1052,7 @@ function renderCestasGrid(){
       +(vend?''
         :'<div class="cc-footer">'
           +'<button class="btn btn-p sm" style="flex:1" onclick="abrirAddItem(\''+c.numero+'\')"><i class="fas fa-plus"></i> Adicionar Produto</button>'
+          +'<button class="btn btn-b sm" onclick="abrirEditFoto(\''+c.numero+'\',\''+esc(c.fotoUrl||'')+'\')"><i class="fas fa-camera"></i></button>'
           +'<button class="btn btn-d sm" onclick="excluirCesta(\''+c.numero+'\')"><i class="fas fa-trash"></i></button>'
           +'</div>')
       +'</div>'
@@ -1138,6 +1178,8 @@ function abrirModalCesta(){
   document.getElementById('cObs').value='';
   document.getElementById('cMargem').value='120';
   document.getElementById('cBuscaProd').value='';
+  document.getElementById('cFoto').value='';
+  document.getElementById('cFotoPreview').style.display='none';
   _cardState={};
   renderCardsProd();
   recalcPreviewCesta();
@@ -1280,6 +1322,7 @@ function recalcPreviewCesta(){
 function salvarCesta(){
   var margem=document.getElementById('cMargem').value;
   if(!margem){toast('Informe a margem de venda!','err');return;}
+  var fotoUrl=document.getElementById('cFoto').value.trim();
   var itensSel=[];
   Object.keys(_cardState).forEach(function(nome){
     var s=_cardState[nome];
@@ -1289,13 +1332,13 @@ function salvarCesta(){
   cestasApi.criarCesta({
     rotulo:     document.getElementById('cRotulo').value.trim(),
     observacao: document.getElementById('cObs').value.trim(),
-    margem:     margem
+    margem:     margem,
+    fotoUrl:    fotoUrl
   })
   .then(function(r){
     if(!r.sucesso){unload();toast(r.mensagem,'err');return;}
     var numero=r.numero;
     if(!itensSel.length){unload();toast(r.mensagem,'ok');fechar('ovCesta');_cardState={};init();return;}
-    // Adicionar itens em sequência
     var chain=Promise.resolve();
     itensSel.forEach(function(it){
       chain=chain.then(function(){
@@ -1463,6 +1506,43 @@ function renderPagP(){
   document.getElementById('btnNextP').disabled=_pagP>=pags;
 }
 function irPagP(d){var pags=Math.ceil(_filtProd.length/_pp)||1;_pagP=Math.max(1,Math.min(pags,_pagP+d));renderTabProd();}
+
+// ── FOTO DA CESTA ────────────────────────────────────────────
+var _fotoCestaCtx=null;
+function previewFotoCesta(){
+  var url=document.getElementById('cFoto').value.trim();
+  var prev=document.getElementById('cFotoPreview');
+  var img=document.getElementById('cFotoImg');
+  if(url){prev.style.display='block';img.src=url;}
+  else{prev.style.display='none';}
+}
+function abrirEditFoto(numero, fotoAtual){
+  _fotoCestaCtx=String(numero);
+  document.getElementById('fotoUrl').value=fotoAtual||'';
+  var prev=document.getElementById('fotoEditPreview');
+  var img=document.getElementById('fotoEditImg');
+  if(fotoAtual){prev.style.display='block';img.src=fotoAtual;}
+  else{prev.style.display='none';}
+  document.getElementById('ovFoto').classList.add('on');
+}
+function previewFotoEdit(){
+  var url=document.getElementById('fotoUrl').value.trim();
+  var prev=document.getElementById('fotoEditPreview');
+  var img=document.getElementById('fotoEditImg');
+  if(url){prev.style.display='block';img.src=url;}
+  else{prev.style.display='none';}
+}
+function salvarFotoCesta(url){
+  if(!_fotoCestaCtx) return;
+  loading('Salvando foto...');
+  cestasApi.atualizarFotoCesta(_fotoCestaCtx, url)
+    .then(function(r){
+      unload();
+      if(r.sucesso){toast(url?'Foto salva!':'Foto removida.','ok');fechar('ovFoto');init();}
+      else toast(r.mensagem,'err');
+    })
+    .catch(function(e){unload();toast('Erro: '+e,'err');});
+}
 
 // ── UTILS ────────────────────────────────────────────────────
 function fechar(id){document.getElementById(id).classList.remove('on');}

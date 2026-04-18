@@ -51,6 +51,7 @@ const cestasApi = {
   addItemCesta:          (dados)                           => cestasApi._call('addItemCesta',           { dados }),
   removerItemCesta:      (numeroCesta, nomeProduto)        => cestasApi._call('removerItemCesta',       { numeroCesta, nomeProduto }),
   atualizarMargemCesta:  (numero, margem)                  => cestasApi._call('atualizarMargemCesta',   { numero, margem }),
+  atualizarFotoCesta:    (numero, fotoUrl)                 => cestasApi._call('atualizarFotoCesta',     { numero, fotoUrl }),
 
   // ── VENDAS ────────────────────────────────────────────────────────────────
   registrarVenda: (dados)                                  => cestasApi._call('registrarVenda',        { dados }),
