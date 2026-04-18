@@ -1,6 +1,6 @@
 // =============================================================================
-//  config.js — SISTEMA DE CESTAS DIA DAS MÃES
-//  GitHub Pages
+//  config.js — SISTEMA DE CESTAS DIA DAS MÃES v3.0
+//  GitHub Pages + Google Apps Script
 //
 //  ⚠️  Após reimplantar o Apps Script, atualize apenas o API_URL abaixo.
 //  ⚠️  Nunca commite tokens, senhas ou credenciais neste arquivo.
@@ -8,15 +8,13 @@
 
 const CESTAS_CONFIG = {
   // 👇 Cole aqui a URL do seu Apps Script após publicar como "Aplicativo da Web"
-  API_URL:   'https://script.google.com/macros/s/AKfycbye3EHth0vzIfXx3K-5ec9MXV42XXHNs1XQbqHdjlAYm46FOZNn2l7sOg7xjCak867Crg/exec',
-  TIMEOUT_MS: 20000,   // 20 s — GAS pode ser lento
-  VERSION:   '1.0.0'
+  API_URL:    'https://script.google.com/macros/s/AKfycbye3EHth0vzIfXx3K-5ec9MXV42XXHNs1XQbqHdjlAYm46FOZNn2l7sOg7xjCak867Crg/exec',
+  TIMEOUT_MS:  20000,
+  VERSION:    '3.0.0'
 };
 
 // =============================================================================
 //  CAMADA DE API
-//  Envia { acao, ...args } via POST com Content-Type: text/plain
-//  (evita preflight CORS — requisito obrigatório para o Apps Script)
 // =============================================================================
 const cestasApi = {
 
@@ -41,21 +39,20 @@ const cestasApi = {
   },
 
   // ── DADOS ─────────────────────────────────────────────────────────────────
-  carregarDados: ()                         => cestasApi._call('carregarDados'),
+  carregarDados: ()                                        => cestasApi._call('carregarDados'),
 
   // ── PRODUTOS ──────────────────────────────────────────────────────────────
-  cadastrarProduto: (dados)                 => cestasApi._call('cadastrarProduto',   { dados }),
-  excluirProduto:   (id)                    => cestasApi._call('excluirProduto',      { id }),
+  cadastrarProduto: (dados)                                => cestasApi._call('cadastrarProduto',     { dados }),
+  excluirProduto:   (id)                                   => cestasApi._call('excluirProduto',        { id }),
 
-  // ── MODELOS ───────────────────────────────────────────────────────────────
-  cadastrarModelo:  (dados)                 => cestasApi._call('cadastrarModelo',    { dados }),
-  excluirModelo:    (nome)                  => cestasApi._call('excluirModelo',       { nome }),
-
-  // ── COMPOSIÇÃO ────────────────────────────────────────────────────────────
-  addItemComposicao:    (dados)             => cestasApi._call('addItemComposicao',  { dados }),
-  removerItemComposicao:(nomeCesta, nomeProduto) => cestasApi._call('removerItemComposicao', { nomeCesta, nomeProduto }),
+  // ── CESTAS ────────────────────────────────────────────────────────────────
+  criarCesta:            (dados)                           => cestasApi._call('criarCesta',            { dados }),
+  excluirCesta:          (numero)                          => cestasApi._call('excluirCesta',           { numero }),
+  addItemCesta:          (dados)                           => cestasApi._call('addItemCesta',           { dados }),
+  removerItemCesta:      (numeroCesta, nomeProduto)        => cestasApi._call('removerItemCesta',       { numeroCesta, nomeProduto }),
+  atualizarMargemCesta:  (numero, margem)                  => cestasApi._call('atualizarMargemCesta',   { numero, margem }),
 
   // ── VENDAS ────────────────────────────────────────────────────────────────
-  registrarVenda: (dados)                   => cestasApi._call('registrarVenda',     { dados }),
-  excluirVenda:   (id)                      => cestasApi._call('excluirVenda',        { id }),
+  registrarVenda: (dados)                                  => cestasApi._call('registrarVenda',        { dados }),
+  excluirVenda:   (id)                                     => cestasApi._call('excluirVenda',           { id }),
 };
