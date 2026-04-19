@@ -521,6 +521,7 @@ tr:hover td{background:rgba(255,110,180,.03)}
         <div class="tb-sep"></div>
         <div class="kpi"><div class="kpi-v amber" id="hDisp">0/0</div><div class="kpi-l">Disponíveis</div></div>
       </div>
+      <button class="btn btn-s" onclick="testarConexaoAPI()" title="Testar conexão com a API"><i class="fas fa-plug"></i></button>
       <button class="btn btn-g" onclick="pg('pgVend','mnVend','green')"><i class="fas fa-cash-register"></i> Registrar Venda</button>
     </div>
   </div>
@@ -903,6 +904,42 @@ function pg(id,menuId,clr){
   closeMobSb();
 }
 
+// ── TESTAR CONEXÃO API (diagnóstico) ────────────────────────
+function testarConexaoAPI(){
+  loading('Testando conexão com a API...');
+  cestasApi.carregarDados()
+    .then(function(r){
+      unload();
+      var msg='✅ API respondeu!\n\n';
+      msg+='Sucesso: '+(r.sucesso?'SIM':'NÃO')+'\n';
+      if(!r.sucesso){ msg+='Erro: '+r.mensagem; toast(msg,'err'); return; }
+      msg+='Produtos: '+(r.produtos||[]).length+'\n';
+      msg+='Cestas: '+(r.cestas||[]).length+'\n';
+      msg+='Composição: '+(r.composicao||[]).length+'\n';
+      msg+='Vendas: '+(r.vendas||[]).length+'\n';
+      if((r.produtos||[]).length>0){
+        var p0=r.produtos[0];
+        msg+='\nPrimeiro produto:\n';
+        msg+='  id: '+p0.id+'\n';
+        msg+='  nome: "'+p0.nome+'"\n';
+        msg+='  valorUnitario: '+p0.valorUnitario+'\n';
+        if(!p0.nome||p0.nome.trim()===''){
+          msg+='\n⚠️ NOME VAZIO — problema de mapeamento de colunas!\n';
+          msg+='Use "Criar/Recriar Estrutura" no Apps Script.';
+          toast('Nome do produto vazio — veja o alerta no painel','err');
+        } else {
+          toast('API OK! Produtos carregados corretamente.','ok');
+        }
+      }
+      alert(msg);
+    })
+    .catch(function(e){
+      unload();
+      toast('Erro de conexão: '+e,'err');
+      alert('❌ Erro de conexão:\n\n'+e+'\n\nVerifique:\n1. URL no api-url.json\n2. Apps Script implantado como "Qualquer pessoa"\n3. URL termina em /exec');
+    });
+}
+
 // ── INIT ────────────────────────────────────────────────────
 function init(){
   loading('Carregando dados...');
@@ -1249,15 +1286,37 @@ function renderCardsProd(filtro){
   var el=document.getElementById('prodCardsList');
   if(!el) return;
   var lista=_produtos.slice();
+
+  // ── DEBUG: detecta produtos com nome vazio (bug de mapeamento de coluna) ──
+  var semNome=lista.filter(function(p){return !p.nome||p.nome.trim()==='';});
+  if(semNome.length>0 && lista.length>0){
+    // Mostra alerta de diagnóstico dentro da lista
+    el.innerHTML='<div style="background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--txt2);margin-bottom:10px">'
+      +'<div style="font-weight:700;color:var(--red);margin-bottom:8px">⚠️ Problema detectado: '+semNome.length+' produto(s) sem nome</div>'
+      +'<div style="margin-bottom:8px">Isso indica que a planilha <strong>COMPRAS</strong> tem colunas em ordem diferente da esperada pelo sistema.</div>'
+      +'<div style="margin-bottom:10px"><strong>Solução:</strong> Vá ao Google Sheets → menu <strong>🧺 SISTEMA CESTAS → Criar/Recriar Estrutura</strong> e reimplante o Apps Script.</div>'
+      +'<div style="background:var(--ink3);border-radius:6px;padding:8px;font-family:var(--mono);font-size:10px;color:var(--txt3);margin-bottom:8px">'
+      +'JSON bruto (3 primeiros):<br>'+ esc(JSON.stringify(lista.slice(0,3),null,2))
+      +'</div>'
+      +'<button class="btn btn-s sm" onclick="testarConexaoAPI()" style="font-size:11px"><i class="fas fa-bug"></i> Testar API agora</button>'
+      +'</div>';
+    // Mesmo com bug tenta renderizar o que tiver nome
+    lista=lista.filter(function(p){return p.nome&&p.nome.trim()!=='';});
+    if(!lista.length) return;
+    el.innerHTML+='';//continua renderizando abaixo
+  }
+
   if(filtro) lista=lista.filter(function(p){
     return p.nome && p.nome.toLowerCase().includes(filtro.toLowerCase());
   });
   if(!lista.length){
-    el.innerHTML='';
-    var msg=document.createElement('div');
-    msg.style.cssText='color:var(--txt3);font-size:12px;text-align:center;padding:20px';
-    msg.innerHTML=filtro?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Cadastre em <strong>Produtos Comprados</strong>.';
-    el.appendChild(msg);
+    if(!semNome.length){
+      el.innerHTML='';
+      var msg=document.createElement('div');
+      msg.style.cssText='color:var(--txt3);font-size:12px;text-align:center;padding:20px';
+      msg.innerHTML=filtro?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Cadastre em <strong>Produtos Comprados</strong>.';
+      el.appendChild(msg);
+    }
     return;
   }
   _prodCardsMap=lista;
