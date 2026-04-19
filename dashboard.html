@@ -825,6 +825,28 @@ tr:hover td{background:rgba(255,110,180,.03)}
   </div>
 </div>
 
+
+<!-- MODAL: EDITAR PRODUTO -->
+<div class="ov" id="ovEditProd">
+  <div class="modal">
+    <div class="mh"><div class="mt"><div class="mico">✏️</div> Editar Produto Comprado</div><button class="mx" onclick="fechar('ovEditProd')">✕</button></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fgrp f4"><label class="flbl">Nome do Produto <span class="req">*</span></label><input type="text" class="c" id="epNome" placeholder="Ex: Vinho Tinto, Caixa Kraft..." style="width:100%"></div>
+        <div class="fgrp f2"><label class="flbl">Quantidade Comprada <span class="req">*</span></label><input type="number" class="c" id="epQtd" placeholder="Ex: 10" style="width:100%" min="1" oninput="calcUnitarioEdit()"></div>
+        <div class="fgrp f2"><label class="flbl">Valor TOTAL Pago (R$) <span class="req">*</span></label><input type="number" class="c" id="epTotal" placeholder="Ex: 150.00" step="0.01" style="width:100%" oninput="calcUnitarioEdit()"></div>
+        <div class="fgrp f2"><label class="flbl">Valor Unitário (calculado)</label><input type="text" class="c" id="epUnit" readonly style="background:rgba(255,255,255,.03);color:var(--green);font-weight:700"></div>
+        <div class="fgrp f2" style="align-self:flex-end">
+          <div style="background:var(--ac-dim);border:1px solid var(--ac-glow);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--txt2)">
+            <i class="fas fa-info-circle" style="color:var(--ac);margin-right:4px"></i>Valor unitário = total ÷ quantidade
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="fechar('ovEditProd')">Cancelar</button><button class="btn btn-b" onclick="salvarEdicaoProduto()"><i class="fas fa-save"></i> Salvar Alterações</button></div>
+  </div>
+</div>
+
 <div class="lov" id="lov"><div class="spin"></div><div class="ltxt" id="lovTxt">Carregando...</div></div>
 
 <script>
@@ -1149,6 +1171,44 @@ function excluirProduto(id){
   loading('Excluindo...');
   cestasApi.excluirProduto(id)
     .then(function(r){unload();if(r.sucesso){toast(r.mensagem,'ok');init();}else toast(r.mensagem,'err');})
+    .catch(function(e){unload();toast('Erro: '+e,'err');});
+}
+
+// ── EDITAR PRODUTO ───────────────────────────────────────────
+var _editProdId = null;
+function abrirEditarProduto(p){
+  _editProdId = p.id;
+  document.getElementById('epNome').value = p.nome || '';
+  document.getElementById('epQtd').value = p.qtdComprada || '';
+  document.getElementById('epTotal').value = p.valorTotal || '';
+  calcUnitarioEdit();
+  document.getElementById('ovEditProd').classList.add('on');
+}
+function calcUnitarioEdit(){
+  var q=parseFloat(document.getElementById('epQtd').value)||0;
+  var t=parseFloat(document.getElementById('epTotal').value)||0;
+  document.getElementById('epUnit').value = (q>0&&t>0) ? 'R$ '+(t/q).toFixed(2).replace('.',',') : '';
+}
+function salvarEdicaoProduto(){
+  var nome=document.getElementById('epNome').value.trim();
+  var qtd=parseFloat(document.getElementById('epQtd').value);
+  var total=parseFloat(document.getElementById('epTotal').value);
+  if(!nome){toast('Informe o nome do produto.','err');return;}
+  if(!qtd||qtd<=0){toast('Quantidade inválida.','err');return;}
+  if(!total||total<=0){toast('Valor total inválido.','err');return;}
+  if(!_editProdId&&_editProdId!==0){toast('Produto não identificado.','err');return;}
+  loading('Salvando alterações...');
+  cestasApi.excluirProduto(_editProdId)
+    .then(function(r){
+      if(!r.sucesso){unload();toast('Erro ao excluir original: '+r.mensagem,'err');return;}
+      return cestasApi.cadastrarProduto({nome:nome, qtd:qtd, valorTotal:total});
+    })
+    .then(function(r){
+      unload();
+      if(!r){return;}
+      if(r.sucesso){toast('Produto atualizado com sucesso!','ok');fechar('ovEditProd');init();}
+      else toast('Erro ao salvar: '+r.mensagem,'err');
+    })
     .catch(function(e){unload();toast('Erro: '+e,'err');});
 }
 
@@ -1493,7 +1553,7 @@ function renderTabProd(){
       +'<td style="color:var(--green);font-weight:700;font-family:var(--mono)">'+fmtR(p.valorUnitario)+'</td>'
       +'<td><span class="bp '+estqCls+'">'+estq+' disp.</span></td>'
       +'<td style="font-size:11px;color:var(--txt3)">'+esc(p.dataCompra||'—')+'</td>'
-      +'<td style="text-align:center"><button class="btn btn-d sm" onclick="excluirProduto(\''+p.id+'\')"><i class="fas fa-trash"></i></button></td>'
+      +'<td style="text-align:center"><div style="display:flex;gap:4px;justify-content:center"><button class="btn btn-b sm" onclick="abrirEditarProduto(p)" title="Editar"><i class="fas fa-edit"></i></button><button class="btn btn-d sm" onclick="excluirProduto(\''+p.id+'\')"><i class="fas fa-trash"></i></button></div></td>'
       +'</tr>';
   }).join('');
   renderPagP();
