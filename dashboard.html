@@ -1247,54 +1247,130 @@ function abrirModalCesta(){
 
 function renderCardsProd(filtro){
   var el=document.getElementById('prodCardsList');
+  if(!el) return;
   var lista=_produtos.slice();
-  if(filtro) lista=lista.filter(function(p){return p.nome.toLowerCase().includes(filtro.toLowerCase());});
+  if(filtro) lista=lista.filter(function(p){
+    return p.nome && p.nome.toLowerCase().includes(filtro.toLowerCase());
+  });
   if(!lista.length){
-    el.innerHTML='<div style="color:var(--txt3);font-size:12px;text-align:center;padding:20px">'
-      +(filtro?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Cadastre em <strong>Produtos Comprados</strong>.')
-      +'</div>';
+    el.innerHTML='';
+    var msg=document.createElement('div');
+    msg.style.cssText='color:var(--txt3);font-size:12px;text-align:center;padding:20px';
+    msg.innerHTML=filtro?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Cadastre em <strong>Produtos Comprados</strong>.';
+    el.appendChild(msg);
     return;
   }
-  // Usa índice numérico como cardId para evitar problemas com caracteres especiais nos nomes
-  var html=lista.map(function(p,idx){
+  _prodCardsMap=lista;
+  el.innerHTML='';
+  lista.forEach(function(p, idx){
     var key=p.nome;
     var sel=!!(_cardState[key]&&_cardState[key].qtd>0);
-    var estoque=estoqueDisponivel(p.nome);
+    var estoque=0;
+    try{ estoque=estoqueDisponivel(p.nome); }catch(e){}
     var stockCls=estoque<=0?'zero':estoque<=2?'low':'ok';
     var stockTxt=estoque<=0?'Sem estoque':estoque+' un. disp.';
     var cardId='pac_'+idx;
-    var qtdVal=_cardState[key]?_cardState[key].qtd:1;
+    var qtdVal=(_cardState[key]&&_cardState[key].qtd)?_cardState[key].qtd:1;
     var subVal=sel?fmtR(p.valorUnitario*qtdVal):'—';
-    return '<div class="prod-acard'+(sel?' active':'')+(estoque<=0?' zerado':'')+'" id="card_'+cardId+'" data-idx="'+idx+'">'
-      +'<div class="pac-header" onclick="toggleCardProd('+idx+')">'
-      +'<div class="pac-ico">📦</div>'
-      +'<div class="pac-info">'
-      +'<div class="pac-nome">'+esc(p.nome)+'</div>'
-      +'<div class="pac-unit">'+fmtR(p.valorUnitario)+' / unidade</div>'
-      +'</div>'
-      +'<span class="pac-stock '+stockCls+'">'+stockTxt+'</span>'
-      +'<div class="pac-subtotal'+(sel?'':' zero')+'" id="sub_'+cardId+'">'+subVal+'</div>'
-      +'<i class="fas fa-chevron-down pac-chevron"></i>'
-      +'</div>'
-      +'<div class="pac-body">'
-      +'<div class="pac-qty-row">'
-      +'<span class="pac-qty-lbl">Quantidade para esta cesta</span>'
-      +'<div class="pac-qty-ctrl" onclick="event.stopPropagation()">'
-      +'<button class="pac-btn" onclick="stepCard('+idx+',-1)">−</button>'
-      +'<input class="pac-inp" type="number" id="qtd_'+cardId+'" value="'+qtdVal+'" min="1" max="'+Math.max(estoque,99)+'"'
-        +' oninput="onCardQtd('+idx+')">'
-      +'<button class="pac-btn" onclick="stepCard('+idx+',1)">+</button>'
-      +'</div>'
-      +'</div>'
-      +'<div class="pac-calc">Custo: <strong id="calc_'+cardId+'">'+(sel?fmtR(p.valorUnitario*qtdVal):'—')+'</strong>'
-        +' &nbsp;·&nbsp; Estoque após adição: <strong id="stk_'+cardId+'" style="color:'+((estoque-qtdVal)>=0?'var(--green)':'var(--red)')+'">'+Math.max(0,estoque-qtdVal)+' un.</strong>'
-      +'</div>'
-      +'</div>'
-      +'</div>';
-  }).join('');
-  el.innerHTML=html;
-  // Registra mapeamento idx -> produto para uso nas funções de callback
-  _prodCardsMap=lista;
+
+    // Container
+    var card=document.createElement('div');
+    card.className='prod-acard'+(sel?' active':'')+(estoque<=0?' zerado':'');
+    card.id='card_'+cardId;
+
+    // Header
+    var hdr=document.createElement('div');
+    hdr.className='pac-header';
+    hdr.setAttribute('onclick','toggleCardProd('+idx+')');
+
+    var ico=document.createElement('div');
+    ico.className='pac-ico';
+    ico.textContent='📦';
+
+    var info=document.createElement('div');
+    info.className='pac-info';
+
+    var nome=document.createElement('div');
+    nome.className='pac-nome';
+    nome.textContent=p.nome||'';
+
+    var unit=document.createElement('div');
+    unit.className='pac-unit';
+    unit.textContent=fmtR(p.valorUnitario)+' / unidade';
+
+    info.appendChild(nome);
+    info.appendChild(unit);
+
+    var stock=document.createElement('span');
+    stock.className='pac-stock '+stockCls;
+    stock.textContent=stockTxt;
+
+    var sub=document.createElement('div');
+    sub.className='pac-subtotal'+(sel?'':' zero');
+    sub.id='sub_'+cardId;
+    sub.textContent=subVal;
+
+    var chev=document.createElement('i');
+    chev.className='fas fa-chevron-down pac-chevron';
+
+    hdr.appendChild(ico);
+    hdr.appendChild(info);
+    hdr.appendChild(stock);
+    hdr.appendChild(sub);
+    hdr.appendChild(chev);
+
+    // Body
+    var body=document.createElement('div');
+    body.className='pac-body';
+
+    var qtyRow=document.createElement('div');
+    qtyRow.className='pac-qty-row';
+
+    var qtyLbl=document.createElement('span');
+    qtyLbl.className='pac-qty-lbl';
+    qtyLbl.textContent='Quantidade para esta cesta';
+
+    var qtyCtrl=document.createElement('div');
+    qtyCtrl.className='pac-qty-ctrl';
+    qtyCtrl.setAttribute('onclick','event.stopPropagation()');
+
+    var btnMinus=document.createElement('button');
+    btnMinus.className='pac-btn';
+    btnMinus.textContent='−';
+    btnMinus.setAttribute('onclick','stepCard('+idx+',-1)');
+
+    var inp=document.createElement('input');
+    inp.className='pac-inp';
+    inp.type='number';
+    inp.id='qtd_'+cardId;
+    inp.value=qtdVal;
+    inp.min=1;
+    inp.max=Math.max(estoque,99);
+    inp.setAttribute('oninput','onCardQtd('+idx+')');
+
+    var btnPlus=document.createElement('button');
+    btnPlus.className='pac-btn';
+    btnPlus.textContent='+';
+    btnPlus.setAttribute('onclick','stepCard('+idx+',1)');
+
+    qtyCtrl.appendChild(btnMinus);
+    qtyCtrl.appendChild(inp);
+    qtyCtrl.appendChild(btnPlus);
+    qtyRow.appendChild(qtyLbl);
+    qtyRow.appendChild(qtyCtrl);
+
+    var calc=document.createElement('div');
+    calc.className='pac-calc';
+    calc.innerHTML='Custo: <strong id="calc_'+cardId+'">'+(sel?fmtR(p.valorUnitario*qtdVal):'—')+'</strong>'
+      +' &nbsp;·&nbsp; Estoque após adição: <strong id="stk_'+cardId+'" style="color:'+((estoque-qtdVal)>=0?'var(--green)':'var(--red)')+'">'+Math.max(0,estoque-qtdVal)+' un.</strong>';
+
+    body.appendChild(qtyRow);
+    body.appendChild(calc);
+
+    card.appendChild(hdr);
+    card.appendChild(body);
+    el.appendChild(card);
+  });
 }
 
 function filtrarCardsProd(){
