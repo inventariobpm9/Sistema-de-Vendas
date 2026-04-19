@@ -1175,19 +1175,19 @@ function excluirProduto(id){
 }
 
 // ── EDITAR PRODUTO ───────────────────────────────────────────
-var _editProdId = null;
+var _editProdId=null;
 function abrirEditarProduto(p){
-  _editProdId = p.id;
-  document.getElementById('epNome').value = p.nome || '';
-  document.getElementById('epQtd').value = p.qtdComprada || '';
-  document.getElementById('epTotal').value = p.valorTotal || '';
+  _editProdId=p.id;
+  document.getElementById('epNome').value=p.nome||'';
+  document.getElementById('epQtd').value=p.qtdComprada||'';
+  document.getElementById('epTotal').value=p.valorTotal||'';
   calcUnitarioEdit();
   document.getElementById('ovEditProd').classList.add('on');
 }
 function calcUnitarioEdit(){
   var q=parseFloat(document.getElementById('epQtd').value)||0;
   var t=parseFloat(document.getElementById('epTotal').value)||0;
-  document.getElementById('epUnit').value = (q>0&&t>0) ? 'R$ '+(t/q).toFixed(2).replace('.',',') : '';
+  document.getElementById('epUnit').value=(q>0&&t>0)?'R$ '+(t/q).toFixed(2).replace('.',','):'';
 }
 function salvarEdicaoProduto(){
   var nome=document.getElementById('epNome').value.trim();
@@ -1196,20 +1196,19 @@ function salvarEdicaoProduto(){
   if(!nome){toast('Informe o nome do produto.','err');return;}
   if(!qtd||qtd<=0){toast('Quantidade inválida.','err');return;}
   if(!total||total<=0){toast('Valor total inválido.','err');return;}
-  if(!_editProdId&&_editProdId!==0){toast('Produto não identificado.','err');return;}
+  if(_editProdId===null&&_editProdId!==0){toast('Produto não identificado.','err');return;}
   loading('Salvando alterações...');
   cestasApi.excluirProduto(_editProdId)
     .then(function(r){
-      if(!r.sucesso){unload();toast('Erro ao excluir original: '+r.mensagem,'err');return;}
-      return cestasApi.cadastrarProduto({nome:nome, qtd:qtd, valorTotal:total});
+      if(!r||!r.sucesso){unload();toast('Erro ao excluir original: '+(r&&r.mensagem||''),'err');return Promise.reject();}
+      return cestasApi.cadastrarProduto({nome:nome,qtd:qtd,valorTotal:total});
     })
     .then(function(r){
       unload();
-      if(!r){return;}
-      if(r.sucesso){toast('Produto atualizado com sucesso!','ok');fechar('ovEditProd');init();}
-      else toast('Erro ao salvar: '+r.mensagem,'err');
+      if(r&&r.sucesso){toast('Produto atualizado com sucesso!','ok');fechar('ovEditProd');init();}
+      else if(r){toast('Erro ao salvar: '+r.mensagem,'err');}
     })
-    .catch(function(e){unload();toast('Erro: '+e,'err');});
+    .catch(function(e){if(e)toast('Erro: '+e,'err');});
 }
 
 // ── MODAL NOVA CESTA — ACCORDION CARDS ──────────────────────
@@ -1256,20 +1255,18 @@ function renderCardsProd(filtro){
       +'</div>';
     return;
   }
-  el.innerHTML=lista.map(function(p){
+  // Usa índice numérico como cardId para evitar problemas com caracteres especiais nos nomes
+  var html=lista.map(function(p,idx){
     var key=p.nome;
     var sel=!!(_cardState[key]&&_cardState[key].qtd>0);
     var estoque=estoqueDisponivel(p.nome);
-    // Ajusta pelo que já está selecionado no estado atual do modal
-    var qtdSel=(_cardState[key]&&sel)?_cardState[key].qtd:0;
-    var estqReal=estoque - qtdSel; // quanto sobra além do selecionado
     var stockCls=estoque<=0?'zero':estoque<=2?'low':'ok';
     var stockTxt=estoque<=0?'Sem estoque':estoque+' un. disp.';
-    var cardId='pac_'+p.nome.replace(/[^a-zA-Z0-9]/g,'_');
+    var cardId='pac_'+idx;
     var qtdVal=_cardState[key]?_cardState[key].qtd:1;
     var subVal=sel?fmtR(p.valorUnitario*qtdVal):'—';
-    return '<div class="prod-acard'+(sel?' active':'')+(estoque<=0?' zerado':'')+'" id="card_'+cardId+'">'
-      +'<div class="pac-header" onclick="toggleCardProd(\''+cardId+'\',\''+esc(p.nome)+'\','+p.valorUnitario+')">'
+    return '<div class="prod-acard'+(sel?' active':'')+(estoque<=0?' zerado':'')+'" id="card_'+cardId+'" data-idx="'+idx+'">'
+      +'<div class="pac-header" onclick="toggleCardProd('+idx+')">'
       +'<div class="pac-ico">📦</div>'
       +'<div class="pac-info">'
       +'<div class="pac-nome">'+esc(p.nome)+'</div>'
@@ -1283,74 +1280,83 @@ function renderCardsProd(filtro){
       +'<div class="pac-qty-row">'
       +'<span class="pac-qty-lbl">Quantidade para esta cesta</span>'
       +'<div class="pac-qty-ctrl" onclick="event.stopPropagation()">'
-      +'<button class="pac-btn" onclick="stepCard(\''+cardId+'\',\''+esc(p.nome)+'\','+p.valorUnitario+',-1)">−</button>'
+      +'<button class="pac-btn" onclick="stepCard('+idx+',-1)">−</button>'
       +'<input class="pac-inp" type="number" id="qtd_'+cardId+'" value="'+qtdVal+'" min="1" max="'+Math.max(estoque,99)+'"'
-        +' oninput="onCardQtd(\''+cardId+'\',\''+esc(p.nome)+'\','+p.valorUnitario+')">'
-      +'<button class="pac-btn" onclick="stepCard(\''+cardId+'\',\''+esc(p.nome)+'\','+p.valorUnitario+',1)">+</button>'
+        +' oninput="onCardQtd('+idx+')">'
+      +'<button class="pac-btn" onclick="stepCard('+idx+',1)">+</button>'
       +'</div>'
       +'</div>'
       +'<div class="pac-calc">Custo: <strong id="calc_'+cardId+'">'+(sel?fmtR(p.valorUnitario*qtdVal):'—')+'</strong>'
-        +' &nbsp;·&nbsp; Estoque após adição: <strong id="stk_'+cardId+'" style="color:'+( (estoque-qtdVal)>=0?'var(--green)':'var(--red)')+'">'+Math.max(0,estoque-qtdVal)+' un.</strong>'
+        +' &nbsp;·&nbsp; Estoque após adição: <strong id="stk_'+cardId+'" style="color:'+((estoque-qtdVal)>=0?'var(--green)':'var(--red)')+'">'+Math.max(0,estoque-qtdVal)+' un.</strong>'
       +'</div>'
       +'</div>'
       +'</div>';
   }).join('');
+  el.innerHTML=html;
+  // Registra mapeamento idx -> produto para uso nas funções de callback
+  _prodCardsMap=lista;
 }
 
 function filtrarCardsProd(){
   renderCardsProd(document.getElementById('cBuscaProd').value);
 }
 
-function toggleCardProd(cardId, nome, unit){
+// _prodCardsMap: lista de produtos na ordem atual dos cards renderizados
+var _prodCardsMap=[];
+
+function toggleCardProd(idx){
+  var p=_prodCardsMap[idx]; if(!p) return;
+  var cardId='pac_'+idx;
   var card=document.getElementById('card_'+cardId);
   if(!card) return;
   var isActive=card.classList.contains('active');
   if(isActive){
-    // Fechar / desmarcar
     card.classList.remove('active');
-    if(_cardState[nome]) _cardState[nome].qtd=0;
+    if(_cardState[p.nome]) _cardState[p.nome].qtd=0;
     document.getElementById('sub_'+cardId).textContent='—';
     document.getElementById('sub_'+cardId).classList.add('zero');
   } else {
-    // Abrir / marcar
     card.classList.add('active');
     var qtd=parseInt(document.getElementById('qtd_'+cardId).value)||1;
-    _cardState[nome]={qtd:qtd,unitario:unit};
-    document.getElementById('sub_'+cardId).textContent=fmtR(unit*qtd);
+    _cardState[p.nome]={qtd:qtd,unitario:p.valorUnitario};
+    document.getElementById('sub_'+cardId).textContent=fmtR(p.valorUnitario*qtd);
     document.getElementById('sub_'+cardId).classList.remove('zero');
-    updateCardCalc(cardId,nome,unit,qtd);
+    updateCardCalc(cardId,p.nome,p.valorUnitario,qtd);
   }
   recalcPreviewCesta();
 }
 
-function onCardQtd(cardId, nome, unit){
+function onCardQtd(idx){
+  var p=_prodCardsMap[idx]; if(!p) return;
+  var cardId='pac_'+idx;
   var inp=document.getElementById('qtd_'+cardId);
   var qtd=Math.max(1,parseInt(inp.value)||1);
   inp.value=qtd;
   var card=document.getElementById('card_'+cardId);
   var isActive=card&&card.classList.contains('active');
   if(isActive){
-    _cardState[nome]={qtd:qtd,unitario:unit};
-    document.getElementById('sub_'+cardId).textContent=fmtR(unit*qtd);
+    _cardState[p.nome]={qtd:qtd,unitario:p.valorUnitario};
+    document.getElementById('sub_'+cardId).textContent=fmtR(p.valorUnitario*qtd);
     document.getElementById('sub_'+cardId).classList.remove('zero');
-  } else if(_cardState[nome]){
-    _cardState[nome].qtd=qtd;
+  } else if(_cardState[p.nome]){
+    _cardState[p.nome].qtd=qtd;
   }
-  updateCardCalc(cardId,nome,unit,qtd);
+  updateCardCalc(cardId,p.nome,p.valorUnitario,qtd);
   recalcPreviewCesta();
 }
 
-function stepCard(cardId, nome, unit, delta){
+function stepCard(idx,delta){
+  var p=_prodCardsMap[idx]; if(!p) return;
+  var cardId='pac_'+idx;
   var inp=document.getElementById('qtd_'+cardId);
   var qtd=Math.max(1,(parseInt(inp.value)||1)+delta);
   inp.value=qtd;
   var card=document.getElementById('card_'+cardId);
-  // Auto-abrir ao incrementar
   if(delta>0&&card&&!card.classList.contains('active')){
-    toggleCardProd(cardId,nome,unit);
+    toggleCardProd(idx);
     return;
   }
-  onCardQtd(cardId,nome,unit);
+  onCardQtd(idx);
 }
 
 function updateCardCalc(cardId,nome,unit,qtd){
