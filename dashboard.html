@@ -633,7 +633,7 @@ tr:hover td{background:rgba(255,110,180,.03)}
       </div>
       <div class="tw" style="max-height:calc(100vh - 250px)">
         <table>
-          <thead><tr><th>ID</th><th>Produto</th><th>Qtd Comprada</th><th>Valor Total</th><th>Valor Unitário</th><th>Data Compra</th><th style="text-align:center">Ações</th></tr></thead>
+          <thead><tr><th>ID</th><th>Produto</th><th>Qtd Comprada</th><th>Valor Total</th><th>Valor Unitário</th><th>Disp.</th><th>Data Compra</th><th style="text-align:center">Ações</th></tr></thead>
           <tbody id="tbProd"><tr><td colspan="7" class="erow"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr></tbody>
         </table>
       </div>
@@ -863,7 +863,7 @@ tr:hover td{background:rgba(255,110,180,.03)}
 // ── ESTADO GLOBAL ────────────────────────────────────────────
 var _produtos=[], _cestas=[], _composicao=[], _vendas=[];
 var _filtVend=[], _filtProd=[];
-var _pagV=1, _pagP=1, _pp=25;
+var _pagV=1, _pagP=1, _pp=5;
 var _cestaCtx=null;
 var _vendaSel=[];
 var _sbC=false;
@@ -1258,7 +1258,7 @@ function abrirModalCesta(){
 // ── CARDS DE PRODUTO (dentro do modal Nova Cesta) ────────────
 var _prodCardsMap  = [];
 var _pagCards      = 1;
-var _ppCards       = 10;
+var _ppCards       = 5;
 var _filtroCards   = '';
 
 function filtrarCardsProd(){
@@ -1654,7 +1654,7 @@ function filtrarProd(){
 function renderTabProd(){
   var tb=document.getElementById('tbProd');
   var ini=(_pagP-1)*_pp, fat=_filtProd.slice(ini,ini+_pp);
-  if(!fat.length){tb.innerHTML='<tr><td colspan="7" class="erow">📭 Nenhum produto encontrado.</td></tr>';renderPagP();return;}
+  if(!fat.length){tb.innerHTML='<tr><td colspan="8" class="erow">📭 Nenhum produto encontrado.</td></tr>';renderPagP();return;}
   tb.innerHTML=fat.map(function(p){
     // Calcula estoque disponível em tempo real
     var estq=estoqueDisponivel(p.nome);
