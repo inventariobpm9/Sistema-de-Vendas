@@ -247,6 +247,9 @@ tr:hover td{background:rgba(255,110,180,.03)}
 @keyframes tIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 .toast.ok{border-left:3px solid var(--green)}.toast.err{border-left:3px solid var(--red)}.toast.info{border-left:3px solid var(--ac2)}
 .bp{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;white-space:nowrap;font-family:var(--mono)}
+.upz{border:2px dashed var(--line2);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:all var(--trans);color:var(--txt3);font-size:12px}
+.upz:hover{border-color:var(--pink);color:var(--pink);background:rgba(255,110,180,.04)}
+.upz i{font-size:20px;margin-bottom:5px;display:block}
 .b-ok{background:#0a2e1e;color:#4ade80}.b-warn{background:#3d2b08;color:#fcd34d}.b-bad{background:#3d1010;color:#f87171}
 .empty-state{text-align:center;padding:48px;color:var(--txt3);font-size:13px;grid-column:1/-1}
 .empty-state i{font-size:32px;display:block;margin-bottom:10px;opacity:.4}
@@ -265,7 +268,7 @@ tr:hover td{background:rgba(255,110,180,.03)}
 
 .prod-acard{border:1px solid var(--line);border-radius:8px;background:var(--ink3);overflow:hidden;transition:border-color var(--trans)}
 .prod-acard.active{border-color:rgba(255,110,180,.45);background:rgba(255,110,180,.05)}
-.prod-acard.zerado{opacity:.45;pointer-events:none}
+.prod-acard.zerado{opacity:.6}
 
 .pac-header{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;user-select:none;transition:background var(--trans)}
 .pac-header:hover{background:rgba(255,255,255,.03)}
@@ -521,7 +524,7 @@ tr:hover td{background:rgba(255,110,180,.03)}
         <div class="tb-sep"></div>
         <div class="kpi"><div class="kpi-v amber" id="hDisp">0/0</div><div class="kpi-l">Disponíveis</div></div>
       </div>
-      <button class="btn btn-s" onclick="testarConexaoAPI()" title="Testar conexão com a API"><i class="fas fa-plug"></i></button>
+      <button class="btn btn-s" onclick="testarConexaoAPI()" title="Testar conexão com a API" style="padding:6px 10px"><i class="fas fa-plug"></i></button>
       <button class="btn btn-g" onclick="pg('pgVend','mnVend','green')"><i class="fas fa-cash-register"></i> Registrar Venda</button>
     </div>
   </div>
@@ -735,10 +738,16 @@ tr:hover td{background:rgba(255,110,180,.03)}
           </div>
         </div>
         <div class="fgrp" style="grid-column:span 2">
-          <label class="flbl"><i class="fas fa-camera" style="color:var(--pink);margin-right:4px"></i>Foto da Cesta (URL pública) <span style="color:var(--txt3);font-weight:400;font-size:9px;text-transform:none;letter-spacing:0"> — aparece na loja</span></label>
-          <input type="url" class="c" id="cFoto" placeholder="https://drive.google.com/uc?id=..." style="width:100%" oninput="previewFotoCesta()">
-          <div id="cFotoPreview" style="display:none;margin-top:6px;border-radius:8px;overflow:hidden;border:1px solid var(--line);max-height:120px">
-            <img id="cFotoImg" src="" alt="Preview" style="width:100%;max-height:120px;object-fit:cover;display:block">
+          <label class="flbl"><i class="fas fa-camera" style="color:var(--pink);margin-right:4px"></i>Foto da Cesta <span style="color:var(--txt3);font-weight:400;font-size:9px;text-transform:none;letter-spacing:0"> — aparece na loja (opcional)</span></label>
+          <div class="upz" id="cFotoZone" onclick="document.getElementById('cFotoInput').click()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Clique para selecionar uma foto</span>
+            <span style="font-size:10px;color:var(--txt3);display:block;margin-top:2px">JPG, PNG, WEBP — máx. 5MB</span>
+            <input type="file" id="cFotoInput" accept="image/*" style="display:none" onchange="handleFotoNovaCesta(event)">
+          </div>
+          <div id="cFotoPreview" style="display:none;margin-top:8px;position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--line);max-height:130px">
+            <img id="cFotoImg" src="" alt="Preview" style="width:100%;max-height:130px;object-fit:cover;display:block">
+            <button onclick="limparFotoNovaCesta()" style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
           </div>
         </div>
       </div>
@@ -803,25 +812,34 @@ tr:hover td{background:rgba(255,110,180,.03)}
 
 <!-- MODAL: EDITAR FOTO DA CESTA -->
 <div class="ov" id="ovFoto">
-  <div class="modal">
+  <div class="modal" style="max-width:500px">
     <div class="mh"><div class="mt"><div class="mico">📷</div> Foto da Cesta</div><button class="mx" onclick="fechar('ovFoto')">✕</button></div>
     <div class="mb">
-      <div style="background:var(--ink3);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font-size:11px;color:var(--txt2);margin-bottom:14px">
-        <i class="fas fa-info-circle" style="color:var(--ac2);margin-right:5px"></i>
-        Cole o link público da imagem. No Google Drive: clique com o botão direito → <strong>Compartilhar → Copiar link</strong>, depois substitua <code style="color:var(--pink)">/d/ID/view</code> por <code style="color:var(--green)">/uc?id=ID</code>.
+      <!-- Foto atual -->
+      <div id="fotoAtualWrap" style="display:none;margin-bottom:14px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);margin-bottom:6px">Foto atual</div>
+        <div style="border-radius:8px;overflow:hidden;border:1px solid var(--line);max-height:150px">
+          <img id="fotoAtualImg" src="" style="width:100%;max-height:150px;object-fit:cover;display:block">
+        </div>
       </div>
-      <div class="fgrp">
-        <label class="flbl">URL da Foto <span style="color:var(--txt3);font-weight:400;font-size:9px;text-transform:none;letter-spacing:0">(Google Drive, Imgur, etc.)</span></label>
-        <input type="url" class="c" id="fotoUrl" placeholder="https://drive.google.com/uc?id=..." style="width:100%" oninput="previewFotoEdit()">
+      <!-- Upload nova foto -->
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);margin-bottom:6px">Nova foto</div>
+      <div class="upz" id="fotoEditZone" onclick="document.getElementById('fotoEditInput').click()">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <span>Clique para selecionar uma imagem</span>
+        <span style="font-size:10px;color:var(--txt3);display:block;margin-top:2px">JPG, PNG, WEBP — máx. 5MB</span>
+        <input type="file" id="fotoEditInput" accept="image/*" style="display:none" onchange="handleFotoEdit(event)">
       </div>
-      <div id="fotoEditPreview" style="display:none;margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid var(--line);max-height:160px">
-        <img id="fotoEditImg" src="" alt="Preview" style="width:100%;max-height:160px;object-fit:cover;display:block">
+      <div id="fotoNovaPreview" style="display:none;margin-top:10px;position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--pink);max-height:150px">
+        <img id="fotoNovaImg" src="" style="width:100%;max-height:150px;object-fit:cover;display:block">
+        <div style="position:absolute;top:5px;right:5px;background:rgba(255,110,180,.9);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">Nova foto</div>
+        <button onclick="limparFotoEdit()" style="position:absolute;top:5px;left:5px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:10px;line-height:1">✕</button>
       </div>
     </div>
     <div class="mf">
       <button class="btn btn-s" onclick="fechar('ovFoto')">Cancelar</button>
-      <button class="btn btn-d sm" onclick="salvarFotoCesta('')" style="margin-right:auto"><i class="fas fa-times"></i> Remover foto</button>
-      <button class="btn btn-p" onclick="salvarFotoCesta(document.getElementById('fotoUrl').value.trim())"><i class="fas fa-save"></i> Salvar Foto</button>
+      <button class="btn btn-d sm" id="btnRemoverFoto" onclick="excluirFotoCesta()" style="margin-right:auto;display:none"><i class="fas fa-times"></i> Remover</button>
+      <button class="btn btn-p" id="btnSalvarFoto" onclick="confirmarUploadFoto()" disabled><i class="fas fa-save"></i> Salvar Foto</button>
     </div>
   </div>
 </div>
@@ -904,40 +922,30 @@ function pg(id,menuId,clr){
   closeMobSb();
 }
 
-// ── TESTAR CONEXÃO API (diagnóstico) ────────────────────────
+// ── DIAGNÓSTICO DE CONEXÃO ───────────────────────────────────
 function testarConexaoAPI(){
-  loading('Testando conexão com a API...');
+  loading('Testando conexão...');
   cestasApi.carregarDados()
     .then(function(r){
       unload();
       var msg='✅ API respondeu!\n\n';
       msg+='Sucesso: '+(r.sucesso?'SIM':'NÃO')+'\n';
-      if(!r.sucesso){ msg+='Erro: '+r.mensagem; toast(msg,'err'); return; }
+      if(!r.sucesso){msg+='Erro: '+r.mensagem;toast('Erro na API','err');alert(msg);return;}
       msg+='Produtos: '+(r.produtos||[]).length+'\n';
       msg+='Cestas: '+(r.cestas||[]).length+'\n';
       msg+='Composição: '+(r.composicao||[]).length+'\n';
       msg+='Vendas: '+(r.vendas||[]).length+'\n';
       if((r.produtos||[]).length>0){
         var p0=r.produtos[0];
-        msg+='\nPrimeiro produto:\n';
-        msg+='  id: '+p0.id+'\n';
-        msg+='  nome: "'+p0.nome+'"\n';
-        msg+='  valorUnitario: '+p0.valorUnitario+'\n';
+        msg+='\nPrimeiro produto:\n  id: "'+p0.id+'"\n  nome: "'+p0.nome+'"\n  qtdComprada: '+p0.qtdComprada+'\n  valorUnitario: '+p0.valorUnitario;
         if(!p0.nome||p0.nome.trim()===''){
-          msg+='\n⚠️ NOME VAZIO — problema de mapeamento de colunas!\n';
-          msg+='Use "Criar/Recriar Estrutura" no Apps Script.';
-          toast('Nome do produto vazio — veja o alerta no painel','err');
-        } else {
-          toast('API OK! Produtos carregados corretamente.','ok');
-        }
+          msg+='\n\n⚠️ NOME VAZIO — veja instrução abaixo.';
+          toast('Nome vazio — use Codigo_v5.gs','err');
+        } else { toast('API OK! '+r.produtos.length+' produtos carregados.','ok'); }
       }
       alert(msg);
     })
-    .catch(function(e){
-      unload();
-      toast('Erro de conexão: '+e,'err');
-      alert('❌ Erro de conexão:\n\n'+e+'\n\nVerifique:\n1. URL no api-url.json\n2. Apps Script implantado como "Qualquer pessoa"\n3. URL termina em /exec');
-    });
+    .catch(function(e){unload();toast('Falha de conexão','err');alert('❌ Erro:\n\n'+e+'\n\nVerifique api-url.json e a implantação do Apps Script.');});
 }
 
 // ── INIT ────────────────────────────────────────────────────
@@ -1274,8 +1282,6 @@ function abrirModalCesta(){
   document.getElementById('cObs').value='';
   document.getElementById('cMargem').value='120';
   document.getElementById('cBuscaProd').value='';
-  document.getElementById('cFoto').value='';
-  document.getElementById('cFotoPreview').style.display='none';
   _cardState={};
   renderCardsProd();
   recalcPreviewCesta();
@@ -1286,37 +1292,15 @@ function renderCardsProd(filtro){
   var el=document.getElementById('prodCardsList');
   if(!el) return;
   var lista=_produtos.slice();
-
-  // ── DEBUG: detecta produtos com nome vazio (bug de mapeamento de coluna) ──
-  var semNome=lista.filter(function(p){return !p.nome||p.nome.trim()==='';});
-  if(semNome.length>0 && lista.length>0){
-    // Mostra alerta de diagnóstico dentro da lista
-    el.innerHTML='<div style="background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--txt2);margin-bottom:10px">'
-      +'<div style="font-weight:700;color:var(--red);margin-bottom:8px">⚠️ Problema detectado: '+semNome.length+' produto(s) sem nome</div>'
-      +'<div style="margin-bottom:8px">Isso indica que a planilha <strong>COMPRAS</strong> tem colunas em ordem diferente da esperada pelo sistema.</div>'
-      +'<div style="margin-bottom:10px"><strong>Solução:</strong> Vá ao Google Sheets → menu <strong>🧺 SISTEMA CESTAS → Criar/Recriar Estrutura</strong> e reimplante o Apps Script.</div>'
-      +'<div style="background:var(--ink3);border-radius:6px;padding:8px;font-family:var(--mono);font-size:10px;color:var(--txt3);margin-bottom:8px">'
-      +'JSON bruto (3 primeiros):<br>'+ esc(JSON.stringify(lista.slice(0,3),null,2))
-      +'</div>'
-      +'<button class="btn btn-s sm" onclick="testarConexaoAPI()" style="font-size:11px"><i class="fas fa-bug"></i> Testar API agora</button>'
-      +'</div>';
-    // Mesmo com bug tenta renderizar o que tiver nome
-    lista=lista.filter(function(p){return p.nome&&p.nome.trim()!=='';});
-    if(!lista.length) return;
-    el.innerHTML+='';//continua renderizando abaixo
-  }
-
   if(filtro) lista=lista.filter(function(p){
     return p.nome && p.nome.toLowerCase().includes(filtro.toLowerCase());
   });
   if(!lista.length){
-    if(!semNome.length){
-      el.innerHTML='';
-      var msg=document.createElement('div');
-      msg.style.cssText='color:var(--txt3);font-size:12px;text-align:center;padding:20px';
-      msg.innerHTML=filtro?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Cadastre em <strong>Produtos Comprados</strong>.';
-      el.appendChild(msg);
-    }
+    el.innerHTML='';
+    var msg=document.createElement('div');
+    msg.style.cssText='color:var(--txt3);font-size:12px;text-align:center;padding:20px';
+    msg.innerHTML=filtro?'Nenhum produto encontrado.':'Nenhum produto cadastrado. Cadastre em <strong>Produtos Comprados</strong>.';
+    el.appendChild(msg);
     return;
   }
   _prodCardsMap=lista;
@@ -1326,15 +1310,17 @@ function renderCardsProd(filtro){
     var sel=!!(_cardState[key]&&_cardState[key].qtd>0);
     var estoque=0;
     try{ estoque=estoqueDisponivel(p.nome); }catch(e){}
+    var temQtd=(p.qtdComprada||0)>0;
     var stockCls=estoque<=0?'zero':estoque<=2?'low':'ok';
-    var stockTxt=estoque<=0?'Sem estoque':estoque+' un. disp.';
+    // Se qtdComprada não veio da API, só mostra o preço unitário
+    var stockTxt=temQtd?(estoque<=0?'Sem estoque':estoque+' un. disp.'):fmtR(p.valorUnitario)+'/un';
     var cardId='pac_'+idx;
     var qtdVal=(_cardState[key]&&_cardState[key].qtd)?_cardState[key].qtd:1;
     var subVal=sel?fmtR(p.valorUnitario*qtdVal):'—';
 
-    // Container
+    // Container — NUNCA bloqueia o card, apenas escurece levemente se zerado
     var card=document.createElement('div');
-    card.className='prod-acard'+(sel?' active':'')+(estoque<=0?' zerado':'');
+    card.className='prod-acard'+(sel?' active':'');
     card.id='card_'+cardId;
 
     // Header
@@ -1523,7 +1509,6 @@ function recalcPreviewCesta(){
 function salvarCesta(){
   var margem=document.getElementById('cMargem').value;
   if(!margem){toast('Informe a margem de venda!','err');return;}
-  var fotoUrl=document.getElementById('cFoto').value.trim();
   var itensSel=[];
   Object.keys(_cardState).forEach(function(nome){
     var s=_cardState[nome];
@@ -1534,12 +1519,12 @@ function salvarCesta(){
     rotulo:     document.getElementById('cRotulo').value.trim(),
     observacao: document.getElementById('cObs').value.trim(),
     margem:     margem,
-    fotoUrl:    fotoUrl
+    fotoUrl:    ''
   })
   .then(function(r){
     if(!r.sucesso){unload();toast(r.mensagem,'err');return;}
     var numero=r.numero;
-    if(!itensSel.length){unload();toast(r.mensagem,'ok');fechar('ovCesta');_cardState={};init();return;}
+    // Encadeia: adicionar itens → depois upload da foto (se houver)
     var chain=Promise.resolve();
     itensSel.forEach(function(it){
       chain=chain.then(function(){
@@ -1547,10 +1532,15 @@ function salvarCesta(){
       });
     });
     return chain.then(function(){
+      if(_fotoNovaCesta){
+        return cestasApi._call('salvarFotoCesta',{numero:numero,base64:_fotoNovaCesta.base64,tipo:_fotoNovaCesta.tipo,nome:_fotoNovaCesta.nome});
+      }
+    }).then(function(){
       unload();
-      toast('Cesta '+numero+' criada com '+itensSel.length+' produto(s)!','ok');
+      toast('Cesta '+numero+' criada'+(itensSel.length?' com '+itensSel.length+' produto(s)':'')+(!_fotoNovaCesta?'':' e foto')+'!','ok');
       fechar('ovCesta');
       _cardState={};
+      _fotoNovaCesta=null;
       init();
     });
   })
@@ -1708,39 +1698,99 @@ function renderPagP(){
 }
 function irPagP(d){var pags=Math.ceil(_filtProd.length/_pp)||1;_pagP=Math.max(1,Math.min(pags,_pagP+d));renderTabProd();}
 
-// ── FOTO DA CESTA ────────────────────────────────────────────
-var _fotoCestaCtx=null;
-function previewFotoCesta(){
-  var url=document.getElementById('cFoto').value.trim();
-  var prev=document.getElementById('cFotoPreview');
-  var img=document.getElementById('cFotoImg');
-  if(url){prev.style.display='block';img.src=url;}
-  else{prev.style.display='none';}
+// ── FOTO DA CESTA — UPLOAD DIRETO NO DRIVE ──────────────────
+var _fotoCestaCtx  = null; // numero da cesta em edição
+var _fotoNovaDados = null; // { base64, tipo, nome } — modal editar
+var _fotoNovaCesta = null; // { base64, tipo, nome } — modal nova cesta
+
+// Lê arquivo e converte para base64
+function _lerFoto(file, cb) {
+  if (!file) return;
+  if (file.size > 5*1024*1024) { toast('Foto maior que 5MB!','err'); return; }
+  if (!file.type.startsWith('image/')) { toast('Selecione uma imagem válida.','err'); return; }
+  var r=new FileReader();
+  r.onload=function(ev){ cb({base64:ev.target.result.split(',')[1], tipo:file.type, nome:file.name, dataUrl:ev.target.result}); };
+  r.readAsDataURL(file);
 }
-function abrirEditFoto(numero, fotoAtual){
+
+// ── Modal Nova Cesta ──
+function handleFotoNovaCesta(e) {
+  _lerFoto(e.target.files[0], function(d){
+    _fotoNovaCesta=d;
+    document.getElementById('cFotoImg').src=d.dataUrl;
+    document.getElementById('cFotoPreview').style.display='block';
+    document.getElementById('cFotoZone').style.display='none';
+  });
+  e.target.value='';
+}
+function limparFotoNovaCesta() {
+  _fotoNovaCesta=null;
+  document.getElementById('cFotoPreview').style.display='none';
+  document.getElementById('cFotoZone').style.display='block';
+  document.getElementById('cFotoInput').value='';
+}
+
+// ── Modal Editar Foto ──
+function handleFotoEdit(e) {
+  _lerFoto(e.target.files[0], function(d){
+    _fotoNovaDados=d;
+    document.getElementById('fotoNovaImg').src=d.dataUrl;
+    document.getElementById('fotoNovaPreview').style.display='block';
+    document.getElementById('fotoEditZone').style.display='none';
+    document.getElementById('btnSalvarFoto').disabled=false;
+  });
+  e.target.value='';
+}
+function limparFotoEdit() {
+  _fotoNovaDados=null;
+  document.getElementById('fotoNovaPreview').style.display='none';
+  document.getElementById('fotoEditZone').style.display='block';
+  document.getElementById('fotoEditInput').value='';
+  document.getElementById('btnSalvarFoto').disabled=true;
+}
+
+// ── Abrir modal editar foto ──
+function abrirEditFoto(numero, fotoAtual) {
   _fotoCestaCtx=String(numero);
-  document.getElementById('fotoUrl').value=fotoAtual||'';
-  var prev=document.getElementById('fotoEditPreview');
-  var img=document.getElementById('fotoEditImg');
-  if(fotoAtual){prev.style.display='block';img.src=fotoAtual;}
-  else{prev.style.display='none';}
+  _fotoNovaDados=null;
+  document.getElementById('fotoNovaPreview').style.display='none';
+  document.getElementById('fotoEditZone').style.display='block';
+  document.getElementById('fotoEditInput').value='';
+  document.getElementById('btnSalvarFoto').disabled=true;
+  document.getElementById('btnRemoverFoto').style.display=fotoAtual?'inline-flex':'none';
+  var atualWrap=document.getElementById('fotoAtualWrap');
+  if (fotoAtual) {
+    atualWrap.style.display='block';
+    document.getElementById('fotoAtualImg').src=fotoAtual;
+  } else {
+    atualWrap.style.display='none';
+  }
   document.getElementById('ovFoto').classList.add('on');
 }
-function previewFotoEdit(){
-  var url=document.getElementById('fotoUrl').value.trim();
-  var prev=document.getElementById('fotoEditPreview');
-  var img=document.getElementById('fotoEditImg');
-  if(url){prev.style.display='block';img.src=url;}
-  else{prev.style.display='none';}
-}
-function salvarFotoCesta(url){
-  if(!_fotoCestaCtx) return;
-  loading('Salvando foto...');
-  cestasApi.atualizarFotoCesta(_fotoCestaCtx, url)
+
+// ── Confirmar upload ──
+function confirmarUploadFoto() {
+  if (!_fotoCestaCtx||!_fotoNovaDados) return;
+  loading('Enviando foto para o Drive...');
+  cestasApi._call('salvarFotoCesta',{numero:_fotoCestaCtx,base64:_fotoNovaDados.base64,tipo:_fotoNovaDados.tipo,nome:_fotoNovaDados.nome})
     .then(function(r){
       unload();
-      if(r.sucesso){toast(url?'Foto salva!':'Foto removida.','ok');fechar('ovFoto');init();}
-      else toast(r.mensagem,'err');
+      if(r&&r.sucesso){toast('✅ Foto salva!','ok');fechar('ovFoto');_fotoNovaDados=null;init();}
+      else toast(r?r.mensagem:'Erro desconhecido','err');
+    })
+    .catch(function(e){unload();toast('Erro: '+e,'err');});
+}
+
+// ── Excluir foto ──
+function excluirFotoCesta() {
+  if (!_fotoCestaCtx) return;
+  if (!confirm('Remover a foto da Cesta '+_fotoCestaCtx+'?')) return;
+  loading('Removendo foto...');
+  cestasApi._call('excluirFotoCesta',{numero:_fotoCestaCtx,fotoId:''})
+    .then(function(r){
+      unload();
+      if(r&&r.sucesso){toast('Foto removida.','ok');fechar('ovFoto');init();}
+      else toast(r?r.mensagem:'Erro','err');
     })
     .catch(function(e){unload();toast('Erro: '+e,'err');});
 }
