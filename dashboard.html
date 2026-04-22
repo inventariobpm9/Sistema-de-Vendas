@@ -61,6 +61,8 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',sans-serif;backgrou
 .sb-item.on.green::before{background:var(--green)}
 .sb-item.on.blue{color:var(--ac2);background:var(--ac2-dim)}
 .sb-item.on.blue::before{background:var(--ac2)}
+.sb-item.on.red{color:var(--red);background:rgba(255,77,109,.1)}
+.sb-item.on.red::before{background:var(--red)}
 .sb-ico{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-right:9px;transition:background var(--trans)}
 .sb-label{flex:1;font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis}
 .sb-badge{background:var(--pink);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;font-family:var(--mono);margin-left:4px;flex-shrink:0}
@@ -492,6 +494,12 @@ tr:hover td{background:rgba(255,110,180,.03)}
       <span class="sb-label">Produtos Comprados</span>
       <span class="sb-badge amber" id="bdgProd">0</span>
     </div>
+    <div class="sb-section-label">FINANCEIRO</div>
+    <div class="sb-item" id="mnGastos" onclick="pg('pgGastos','mnGastos','red')" style="--ca:var(--red)">
+      <div class="sb-ico"><i class="fas fa-receipt"></i></div>
+      <span class="sb-label">Outros Gastos</span>
+      <span class="sb-badge" id="bdgGastos" style="background:var(--red)">0</span>
+    </div>
   </nav>
   <div class="sb-usr">
     <div class="usr-ava">🎀</div>
@@ -646,6 +654,48 @@ tr:hover td{background:rgba(255,110,180,.03)}
       </div>
     </div>
 
+    <!-- OUTROS GASTOS -->
+    <div class="pg" id="pgGastos">
+      <div class="bar">
+        <div class="bl">
+          <span style="font-weight:700;font-size:12px;color:var(--red)"><i class="fas fa-receipt" style="margin-right:6px"></i>Outros Gastos</span>
+          <select class="c" id="fGastosCat" onchange="filtrarGastos()" style="min-width:150px">
+            <option value="">Todas as categorias</option>
+            <option value="Transporte">🚗 Transporte</option>
+            <option value="Embalagem">📦 Embalagem</option>
+            <option value="Marketing">📣 Marketing</option>
+            <option value="Alimentação">🍽️ Alimentação</option>
+            <option value="Outros">🔧 Outros</option>
+          </select>
+        </div>
+        <div class="br">
+          <div style="background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.2);border-radius:6px;padding:5px 12px;font-size:12px">
+            <span style="color:var(--txt3)">Total gastos:</span>
+            <span style="color:var(--red);font-weight:700;font-family:var(--mono);margin-left:6px" id="totalGastosLabel">R$ 0,00</span>
+          </div>
+          <button class="btn btn-d" onclick="abrirModalGasto()"><i class="fas fa-plus"></i> Registrar Gasto</button>
+          <button class="btn btn-s" onclick="init()"><i class="fas fa-sync-alt"></i></button>
+        </div>
+      </div>
+      <div style="background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.2);border-radius:7px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:var(--txt2);display:flex;align-items:center;gap:8px">
+        <i class="fas fa-info-circle" style="color:var(--red)"></i>
+        Gastos como gasolina, Uber, materiais de embalagem, etc. São <strong style="color:var(--red)">descontados automaticamente do lucro total</strong> no Dashboard.
+      </div>
+      <div class="tw" style="max-height:calc(100vh - 280px)">
+        <table>
+          <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Obs.</th><th style="text-align:center">Ações</th></tr></thead>
+          <tbody id="tbGastos"><tr><td colspan="6" class="erow">Nenhum gasto registrado.</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pag">
+        <span id="pgInfoGastos">—</span>
+        <div class="pag-btns">
+          <button class="pb" id="btnPrevG" onclick="irPagG(-1)" disabled><i class="fas fa-chevron-left"></i> Anterior</button>
+          <button class="pb" id="btnNextG" onclick="irPagG(1)" disabled>Próximo <i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 </div>
@@ -681,13 +731,36 @@ tr:hover td{background:rgba(255,110,180,.03)}
     <div class="mh"><div class="mt"><div class="mico">📦</div> Cadastrar Produto Comprado</div><button class="mx" onclick="fechar('ovProd')">✕</button></div>
     <div class="mb">
       <div class="fg">
-        <div class="fgrp f4"><label class="flbl">Nome do Produto <span class="req">*</span></label><input type="text" class="c" id="pNome" placeholder="Ex: Vinho Tinto, Caixa Kraft, Laço Dourado" style="width:100%"></div>
+        <div class="fgrp f4"><label class="flbl">Nome do Produto <span class="req">*</span></label><input type="text" class="c" id="pNome" placeholder="Ex: Vinho Tinto, Caixa Kraft, Rolo de Fita" style="width:100%"></div>
         <div class="fgrp f2"><label class="flbl">Quantidade Comprada <span class="req">*</span></label><input type="number" class="c" id="pQtd" placeholder="Ex: 10" style="width:100%" min="1" oninput="calcUnitario()"></div>
         <div class="fgrp f2"><label class="flbl">Valor TOTAL Pago (R$) <span class="req">*</span></label><input type="number" class="c" id="pTotal" placeholder="Ex: 150.00" step="0.01" style="width:100%" oninput="calcUnitario()"></div>
         <div class="fgrp f2"><label class="flbl">Valor Unitário (calculado)</label><input type="text" class="c" id="pUnit" readonly style="background:rgba(255,255,255,.03);color:var(--green);font-weight:700"></div>
         <div class="fgrp f2" style="align-self:flex-end">
           <div style="background:var(--ac-dim);border:1px solid var(--ac-glow);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--txt2)">
             <i class="fas fa-info-circle" style="color:var(--ac);margin-right:4px"></i>Valor unitário = total ÷ quantidade
+          </div>
+        </div>
+        <!-- RENDIMENTO / FRACIONAMENTO -->
+        <div style="grid-column:span 4;height:1px;background:var(--line);margin:4px 0"></div>
+        <div style="grid-column:span 4;background:rgba(155,93,229,.07);border:1px solid rgba(155,93,229,.2);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--txt2)">
+          <i class="fas fa-cut" style="color:var(--purple);margin-right:5px"></i>
+          <strong style="color:var(--purple)">Produto fracionável?</strong> Ex: 1 rolo de fita → faz 20 laços. Preencha abaixo para calcular o custo por unidade produzida.
+        </div>
+        <div class="fgrp f2">
+          <label class="flbl" style="color:var(--purple)">Unidades produzidas por item <span style="color:var(--txt3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
+          <input type="number" class="c" id="pRendimento" placeholder="Ex: 20 laços por rolo" style="width:100%" min="1" oninput="calcUnitario()">
+        </div>
+        <div class="fgrp f2">
+          <label class="flbl" style="color:var(--purple)">Custo por unidade produzida</label>
+          <input type="text" class="c" id="pCustoFracao" readonly style="background:rgba(255,255,255,.03);color:var(--purple);font-weight:700">
+        </div>
+        <div class="fgrp f2">
+          <label class="flbl" style="color:var(--purple)">Nome da unidade produzida</label>
+          <input type="text" class="c" id="pNomeFracao" placeholder="Ex: laço, porção, peça..." style="width:100%">
+        </div>
+        <div class="fgrp f2" style="align-self:flex-end">
+          <div style="background:rgba(155,93,229,.07);border:1px solid rgba(155,93,229,.2);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--txt2)">
+            <i class="fas fa-tag" style="color:var(--purple);margin-right:4px"></i>Se preencher, o sistema usará o <strong style="color:var(--purple)">custo por unidade produzida</strong> nas cestas.
           </div>
         </div>
       </div>
@@ -857,13 +930,55 @@ tr:hover td{background:rgba(255,110,180,.03)}
   </div>
 </div>
 
+<!-- MODAL: REGISTRAR GASTO -->
+<div class="ov" id="ovGasto">
+  <div class="modal">
+    <div class="mh"><div class="mt"><div class="mico" style="background:linear-gradient(135deg,var(--red),var(--amber))">💸</div> Registrar Gasto</div><button class="mx" onclick="fechar('ovGasto')">✕</button></div>
+    <div class="mb">
+      <div style="background:rgba(255,77,109,.07);border:1px solid rgba(255,77,109,.2);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--txt2);margin-bottom:14px">
+        <i class="fas fa-lightbulb" style="color:var(--amber);margin-right:5px"></i>
+        Use para gastos como <strong>Gasolina</strong>, <strong>Uber</strong>, <strong>Sacolas</strong>, <strong>Fitas/Laços</strong>, <strong>Impressão</strong>, etc.
+      </div>
+      <div class="fg">
+        <div class="fgrp f4">
+          <label class="flbl">Descrição <span class="req">*</span></label>
+          <input type="text" class="c" id="gDesc" placeholder="Ex: Gasolina entrega, Uber centro, Fita decoração..." style="width:100%">
+        </div>
+        <div class="fgrp f2">
+          <label class="flbl">Categoria <span class="req">*</span></label>
+          <select class="c" id="gCat" style="width:100%">
+            <option value="Transporte">🚗 Transporte (Gasolina, Uber...)</option>
+            <option value="Embalagem">📦 Embalagem (Fitas, Laços...)</option>
+            <option value="Marketing">📣 Marketing (Cartões, Impressão...)</option>
+            <option value="Alimentação">🍽️ Alimentação</option>
+            <option value="Outros">🔧 Outros</option>
+          </select>
+        </div>
+        <div class="fgrp f2">
+          <label class="flbl">Valor (R$) <span class="req">*</span></label>
+          <input type="number" class="c" id="gValor" placeholder="Ex: 45.00" step="0.01" min="0.01" style="width:100%">
+        </div>
+        <div class="fgrp f4">
+          <label class="flbl">Observação (opcional)</label>
+          <input type="text" class="c" id="gObs" placeholder="Ex: Entrega no bairro X, 3 viagens..." style="width:100%">
+        </div>
+        <div class="fgrp f2">
+          <label class="flbl">Data <span class="req">*</span></label>
+          <input type="date" class="c" id="gData" style="width:100%">
+        </div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-s" onclick="fechar('ovGasto')">Cancelar</button><button class="btn btn-d" onclick="salvarGasto()"><i class="fas fa-save"></i> Salvar Gasto</button></div>
+  </div>
+</div>
+
 <div class="lov" id="lov"><div class="spin"></div><div class="ltxt" id="lovTxt">Carregando...</div></div>
 
 <script>
 // ── ESTADO GLOBAL ────────────────────────────────────────────
-var _produtos=[], _cestas=[], _composicao=[], _vendas=[];
-var _filtVend=[], _filtProd=[];
-var _pagV=1, _pagP=1, _pp=5;
+var _produtos=[], _cestas=[], _composicao=[], _vendas=[], _gastos=[];
+var _filtVend=[], _filtProd=[], _filtGastos=[];
+var _pagV=1, _pagP=1, _pagG=1, _pp=5;
 var _cestaCtx=null;
 var _vendaSel=[];
 var _sbC=false;
@@ -899,7 +1014,7 @@ function setMobNav(activeId){
 }
 
 // ── NAVEGAÇÃO ────────────────────────────────────────────────
-var _pgMap={pgDash:'Dashboard',pgCestas:'Minhas Cestas',pgVend:'Registrar Venda',pgHist:'Vendas Realizadas',pgProd:'Produtos Comprados'};
+var _pgMap={pgDash:'Dashboard',pgCestas:'Minhas Cestas',pgVend:'Registrar Venda',pgHist:'Vendas Realizadas',pgProd:'Produtos Comprados',pgGastos:'Outros Gastos'};
 function pg(id,menuId,clr){
   document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on')});
   document.querySelectorAll('.sb-item').forEach(function(i){i.classList.remove('on','pink','amber','green','blue')});
@@ -916,6 +1031,8 @@ function pg(id,menuId,clr){
 // ── INIT ────────────────────────────────────────────────────
 function init(){
   loading('Carregando dados...');
+  // Carrega gastos do localStorage (local, não precisa de API)
+  try { _gastos = JSON.parse(localStorage.getItem('_gastosExtras') || '[]'); } catch(e){ _gastos=[]; }
   cestasApi.carregarDados()
     .then(function(r){
       unload();
@@ -934,11 +1051,14 @@ function atualizar(){
   var total = _cestas.length;
   var totalV = _vendas.reduce(function(s,v){return s+(v.totalRecebido||0);},0);
   var totalL = _vendas.reduce(function(s,v){return s+(v.lucro||0);},0);
+  var totalG = _gastos.reduce(function(s,g){return s+(g.valor||0);},0);
+  var lucroLiq = totalL - totalG;
   document.getElementById('bdgProd').textContent  = _produtos.length;
   document.getElementById('bdgCestas').textContent = total;
   document.getElementById('bdgVend').textContent   = _vendas.length;
+  document.getElementById('bdgGastos').textContent = _gastos.length;
   document.getElementById('hVendido').textContent  = fmtR(totalV);
-  document.getElementById('hLucro').textContent    = fmtR(totalL);
+  document.getElementById('hLucro').textContent    = fmtR(lucroLiq);
   document.getElementById('hDisp').textContent     = disp+'/'+total;
   // badges mob-nav
   var mbC=document.getElementById('mbdgCestas');
@@ -952,6 +1072,7 @@ function atualizar(){
   renderVendaGrid();
   filtrarHist();
   filtrarProd();
+  filtrarGastos();
   buildProdDropdown();
 }
 
@@ -959,18 +1080,20 @@ function atualizar(){
 function renderDash(){
   var totalV   = _vendas.reduce(function(s,v){return s+(v.totalRecebido||0);},0);
   var totalL   = _vendas.reduce(function(s,v){return s+(v.lucro||0);},0);
+  var totalG   = _gastos.reduce(function(s,g){return s+(g.valor||0);},0);
+  var lucroLiq = totalL - totalG;
   var totalInv = _produtos.reduce(function(s,p){return s+(p.valorTotal||0);},0);
   var disp     = _cestas.filter(function(c){return c.status==='disponivel';}).length;
   var vend     = _cestas.filter(function(c){return c.status==='vendida';}).length;
-  var roi      = totalInv>0 ? (totalL/totalInv*100) : 0;
-  var margem   = totalV>0  ? (totalL/totalV*100)   : 0;
+  var roi      = totalInv>0 ? (lucroLiq/totalInv*100) : 0;
+  var margem   = totalV>0  ? (lucroLiq/totalV*100)   : 0;
   var cards=[
-    {cls:'c-green', ico:'📈', lbl:'Lucro Total',       val:fmtR(totalL),     trend:totalL>=0?'up':'bad'},
-    {cls:'c-pink',  ico:'💰', lbl:'Total Vendido',     val:fmtR(totalV),     trend:'up'},
-    {cls:'c-amber', ico:'📦', lbl:'Investimento',      val:fmtR(totalInv),   trend:'warn'},
-    {cls:'c-teal',  ico:'🧺', lbl:'Cestas Disponíveis',val:disp,             trend:''},
-    {cls:'c-blue',  ico:'✅', lbl:'Cestas Vendidas',   val:vend,             trend:'up'},
-    {cls:'c-purple',ico:'🔁', lbl:'ROI s/ custo',      val:roi.toFixed(1)+'%',trend:roi>=50?'up':roi>=20?'warn':'bad'}
+    {cls:'c-green', ico:'📈', lbl:'Lucro Líquido',      val:fmtR(lucroLiq),   trend:lucroLiq>=0?'up':'bad'},
+    {cls:'c-pink',  ico:'💰', lbl:'Total Vendido',      val:fmtR(totalV),     trend:'up'},
+    {cls:'c-amber', ico:'📦', lbl:'Investimento',       val:fmtR(totalInv),   trend:'warn'},
+    {cls:'c-teal',  ico:'🧺', lbl:'Cestas Disponíveis', val:disp,             trend:''},
+    {cls:'c-blue',  ico:'✅', lbl:'Cestas Vendidas',    val:vend,             trend:'up'},
+    {cls:'c-purple',ico:'🔁', lbl:'ROI s/ custo',       val:roi.toFixed(1)+'%',trend:roi>=50?'up':roi>=20?'warn':'bad'}
   ];
   document.getElementById('dashCards').innerHTML=cards.map(function(c){
     var tH=c.trend?'<div class="dc-trend '+c.trend+'">'+c.trend.toUpperCase()+'</div>':'';
@@ -997,7 +1120,8 @@ function renderDash(){
   var itens=[
     {nome:'Investimento total (compras)', val:fmtR(totalInv),     cor:'#7a98b8'},
     {nome:'Total recebido (vendas)',      val:fmtR(totalV),       cor:'var(--pink)'},
-    {nome:'Lucro líquido',               val:fmtR(totalL),       cor:totalL>=0?'var(--green)':'var(--red)'},
+    {nome:'Outros gastos',               val:fmtR(totalG),       cor:'var(--red)'},
+    {nome:'Lucro líquido',               val:fmtR(lucroLiq),     cor:lucroLiq>=0?'var(--green)':'var(--red)'},
     {nome:'Margem s/ vendas',            val:margem.toFixed(1)+'%',cor:'var(--amber)'},
     {nome:'Cestas disponíveis',          val:disp+' de '+_cestas.length, cor:'var(--ac)'}
   ];
@@ -1157,22 +1281,33 @@ function salvarVenda(){
 
 // ── MODAL PRODUTO ────────────────────────────────────────────
 function abrirModalProduto(){
-  ['pNome','pQtd','pTotal'].forEach(function(id){document.getElementById(id).value='';});
+  ['pNome','pQtd','pTotal','pRendimento','pNomeFracao'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('pUnit').value='';
+  document.getElementById('pCustoFracao').value='';
   document.getElementById('ovProd').classList.add('on');
 }
 function calcUnitario(){
   var qtd=parseFloat(document.getElementById('pQtd').value)||0;
   var tot=parseFloat(document.getElementById('pTotal').value)||0;
-  document.getElementById('pUnit').value=qtd>0?fmtR(tot/qtd):'—';
+  var rend=parseFloat(document.getElementById('pRendimento').value)||0;
+  var unitario=qtd>0?(tot/qtd):0;
+  document.getElementById('pUnit').value=qtd>0?fmtR(unitario):'—';
+  if(rend>0&&unitario>0){
+    var custoFracao=unitario/rend;
+    document.getElementById('pCustoFracao').value=fmtR(custoFracao);
+  } else {
+    document.getElementById('pCustoFracao').value='—';
+  }
 }
 function salvarProduto(){
   var nome=document.getElementById('pNome').value.trim();
   var qtd=document.getElementById('pQtd').value;
   var total=document.getElementById('pTotal').value;
+  var rend=document.getElementById('pRendimento').value;
+  var nomeFracao=document.getElementById('pNomeFracao').value.trim();
   if(!nome||!qtd||!total){toast('Preencha todos os campos!','err');return;}
   loading('Salvando produto...');
-  cestasApi.cadastrarProduto({nome:nome,qtd:qtd,valorTotal:total})
+  cestasApi.cadastrarProduto({nome:nome,qtd:qtd,valorTotal:total,rendimento:rend||0,nomeFracao:nomeFracao})
     .then(function(r){unload();if(r.sucesso){toast(r.mensagem,'ok');fechar('ovProd');init();}else toast(r.mensagem,'err');})
     .catch(function(e){unload();toast('Erro: '+e,'err');});
 }
@@ -1680,6 +1815,84 @@ function renderPagP(){
   document.getElementById('btnNextP').disabled=_pagP>=pags;
 }
 function irPagP(d){var pags=Math.ceil(_filtProd.length/_pp)||1;_pagP=Math.max(1,Math.min(pags,_pagP+d));renderTabProd();}
+
+// ── OUTROS GASTOS (localStorage) ────────────────────────────
+function filtrarGastos(){
+  var cat=document.getElementById('fGastosCat').value;
+  _filtGastos=_gastos.filter(function(g){return !cat||g.categoria===cat;});
+  _pagG=1; renderTabGastos();
+}
+function renderTabGastos(){
+  var tb=document.getElementById('tbGastos');
+  var total=_gastos.reduce(function(s,g){return s+(g.valor||0);},0);
+  var lbl=document.getElementById('totalGastosLabel');
+  if(lbl) lbl.textContent=fmtR(total);
+  var ini=(_pagG-1)*_pp, fat=_filtGastos.slice(ini,ini+_pp);
+  var catIco={'Transporte':'🚗','Embalagem':'📦','Marketing':'📣','Alimentação':'🍽️','Outros':'🔧'};
+  if(!fat.length){tb.innerHTML='<tr><td colspan="6" class="erow">📭 Nenhum gasto registrado.</td></tr>';renderPagG();return;}
+  tb.innerHTML=fat.map(function(g){
+    return '<tr>'
+      +'<td style="color:var(--txt3);font-family:var(--mono);font-size:11px">'+esc(g.data||'—')+'</td>'
+      +'<td style="font-weight:600">'+esc(g.descricao)+'</td>'
+      +'<td><span class="bp b-warn" style="font-size:10px">'+(catIco[g.categoria]||'🔧')+' '+esc(g.categoria)+'</span></td>'
+      +'<td style="color:var(--red);font-weight:700;font-family:var(--mono)">'+fmtR(g.valor)+'</td>'
+      +'<td style="color:var(--txt3);font-size:11px">'+esc(g.obs||'—')+'</td>'
+      +'<td style="text-align:center"><button class="btn btn-d sm" onclick="excluirGasto(\''+esc(g.id)+'\')"><i class="fas fa-trash"></i></button></td>'
+      +'</tr>';
+  }).join('');
+  renderPagG();
+}
+function renderPagG(){
+  var tot=_filtGastos.length,pags=Math.ceil(tot/_pp)||1;
+  var ini=tot===0?0:(_pagG-1)*_pp+1,fim=Math.min(_pagG*_pp,tot);
+  document.getElementById('pgInfoGastos').textContent='Exibindo '+ini+'–'+fim+' de '+tot;
+  document.getElementById('btnPrevG').disabled=_pagG<=1;
+  document.getElementById('btnNextG').disabled=_pagG>=pags;
+}
+function irPagG(d){var pags=Math.ceil(_filtGastos.length/_pp)||1;_pagG=Math.max(1,Math.min(pags,_pagG+d));renderTabGastos();}
+function abrirModalGasto(){
+  ['gDesc','gObs'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('gValor').value='';
+  document.getElementById('gCat').value='Transporte';
+  // Define data de hoje
+  var hoje=new Date();
+  var dd=('0'+hoje.getDate()).slice(-2), mm=('0'+(hoje.getMonth()+1)).slice(-2), yy=hoje.getFullYear();
+  document.getElementById('gData').value=yy+'-'+mm+'-'+dd;
+  document.getElementById('ovGasto').classList.add('on');
+}
+function salvarGasto(){
+  var desc=document.getElementById('gDesc').value.trim();
+  var valor=parseFloat(document.getElementById('gValor').value)||0;
+  var cat=document.getElementById('gCat').value;
+  var obs=document.getElementById('gObs').value.trim();
+  var data=document.getElementById('gData').value;
+  if(!desc){toast('Informe a descrição do gasto!','err');return;}
+  if(!valor||valor<=0){toast('Informe um valor válido!','err');return;}
+  if(!data){toast('Informe a data!','err');return;}
+  // Formata data dd/mm/aaaa
+  var partes=data.split('-');
+  var dataFmt=partes[2]+'/'+partes[1]+'/'+partes[0];
+  var gasto={
+    id:'g_'+ Date.now(),
+    descricao:desc,
+    categoria:cat,
+    valor:valor,
+    obs:obs,
+    data:dataFmt
+  };
+  _gastos.push(gasto);
+  try{ localStorage.setItem('_gastosExtras', JSON.stringify(_gastos)); }catch(e){}
+  toast('Gasto registrado: '+fmtR(valor),'ok');
+  fechar('ovGasto');
+  atualizar();
+}
+function excluirGasto(id){
+  if(!confirm('Excluir este gasto?')) return;
+  _gastos=_gastos.filter(function(g){return g.id!==id;});
+  try{ localStorage.setItem('_gastosExtras', JSON.stringify(_gastos)); }catch(e){}
+  toast('Gasto excluído.','ok');
+  atualizar();
+}
 
 // ── FOTO DA CESTA ────────────────────────────────────────────
 var _fotoCestaCtx=null;
