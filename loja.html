@@ -84,7 +84,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Nunito',sans-serif;min-h
 /* ── GRID ── */
 .posts-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  grid-template-columns:1fr;
+  max-width:560px;
+  margin:0 auto
   gap:28px
 }
 
@@ -105,14 +107,14 @@ body{background:var(--bg);color:var(--txt);font-family:'Nunito',sans-serif;min-h
   /* usa contain para mostrar a foto inteira sem cortar */
   background:#f8eaf2;
   display:flex;align-items:center;justify-content:center;
-  min-height:260px;overflow:hidden
+  min-height:320px;overflow:hidden
 }
 .post-img-wrap img{
   width:100%;height:100%;
   object-fit:contain; /* foto inteira, sem crop */
   display:block;
   transition:transform .45s ease;
-  max-height:340px
+  max-height:480px
 }
 .post-card:hover .post-img-wrap img{transform:scale(1.03)}
 
