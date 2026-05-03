@@ -230,83 +230,30 @@ body{background:var(--bg);color:var(--txt);font-family:'Nunito',sans-serif;min-h
 <script>
 var WPP = '5569993411271';
 
+// Legenda geral usada em todos os kits
+var LEGENDA = '🌸 Um presente especial para uma mãe especial!\n\nMontado com muito carinho, capricho e amor — porque ela merece ser celebrada todos os dias! 💕\n\nPresente lindo, embalado com elegância e pronto pra alegrar o coração de quem você mais ama. 🎀\n\n📲 Chama no WhatsApp para encomendar o seu!';
+var TAGS = '#DiadasMaes #KitPresente #MimoPraMae #PresenteDeMae #FelizDiadasMaes #Maternidade #ComAmor';
+
 var _posts = [
-  { kit:'Kit 1',  title:'Caneca Feliz Dia das Mães + Ouro Branco',
-    img:'WhatsApp Image 2026-05-03 at 10.44.33.jpeg',
-    legend:'💜 O presentinho perfeito pra quem você ama!\n\nCanequinha temática "Feliz Dia das Mães" recheada de amor e chocolates Ouro Branco 🍫✨\n\nUm mimo especial que cabe no bolso e enche o coração! 💕\n\n📲 Chama no direct ou WhatsApp pra garantir o seu!',
-    tags:'#DiadasMaes #KitPresente #MimoPraMae #OuroBranco #FelizdiadasMaes' },
-  { kit:'Kit 2',  title:'Bolsa e Cinto Miss Doong (Dourado)',
-    img:'WhatsApp Image 2026-05-03 at 10.44.34.jpeg',
-    legend:'🌸 Sofisticação e elegância pra presentear a melhor mãe!\n\nKit bolsa + cinto Miss Doong, embalado com muito carinho em celofane e laço floral dourado 🌺💛\n\nPresente que toda mãe merece receber! 😍\n\n📲 Garanta o seu antes que acabe!',
-    tags:'#KitMãe #BolsaDeMãe #Presentes #DiadasMaes #MissDoong' },
-  { kit:'Kit 3',  title:'Bolsa e Carteira (Rosa/Nude)',
-    img:'WhatsApp Image 2026-05-03 at 10.44.34 (1).jpeg',
-    legend:'🌷 Delicadeza em cada detalhe!\n\nKit bolsa + carteira nas cores rosê, com laço floral e chocolatinho em formato de flor 🌹🍫\n\nUm presente lindo e elegante que qualquer mãe vai amar! 💗\n\n📲 Encomende já!',
-    tags:'#KitBolsa #DiadasMaes #Maternidade #Mimo' },
-  { kit:'Kit 4',  title:'Bolsa + Cinto Miss Doong (Rosa)',
-    img:'WhatsApp Image 2026-05-03 at 10.44.35 (2).jpeg',
-    legend:'💕 Para a mãe que tem estilo!\n\nKit bolsa + cinto Miss Doong em tons nude e rosa, com embalagem floral encantadora 🌸\n\nPresente chique e acessível — ela vai amar! 😍\n\n📲 Fale conosco e garanta o seu!',
-    tags:'#DiadasMaes #BolsaPresente #KitMaeDoAno #Elegancia' },
-  { kit:'Kit 5',  title:'Bolsa Miss Bela Preta + Flores — R$ 130',
-    img:'WhatsApp Image 2026-05-03 at 10.44.35 (1).jpeg',
-    legend:'🖤✨ Clássico e moderno ao mesmo tempo!\n\nKit bolsa Miss Bela preta, flores decorativas lilás e laço dourado floral — R$ 130,00 🌸💛\n\nUm presente que impressiona sem pesar no bolso! 💜\n\n📲 Reserve o seu agora!',
-    tags:'#KitPresente #MissBela #DiadasMaes #BolsaPreta' },
-  { kit:'Kit 6',  title:'Bolsa + Carteira Nude (Caixa Preta/Dourada)',
-    img:'WhatsApp Image 2026-05-03 at 10.44.35 (3).jpeg',
-    legend:'🦋 Presente com charme e delicadeza!\n\nKit bolsa + carteira em nude, com florzinha de laço e embalagem preta borda dourada 🌸💛\n\nPara aquela mãe que merece tudo de bom! 💕\n\n📲 Encomende pelo direct ou WhatsApp!',
-    tags:'#DiadasMaes #KitBolsaCarteira #MimeDeNude #Presentao' },
-  { kit:'Kit 7',  title:'Bolsa Caramelo + Copo Rosa',
-    img:'WhatsApp Image 2026-05-03 at 10.44.37.jpeg',
-    legend:'💜 Praticidade e estilo juntos!\n\nKit bolsa caramelo + copo personalizado para mãe, laço lilás e floral 🌸💜\n\nPresente funcional e lindo — ela vai usar todo dia! ☕💕\n\n📲 Chama pra encomendar!',
-    tags:'#KitMae #DiadasMaes #CopoDaMae #BolsaCaramelo' },
-  { kit:'Kit 8',  title:'Bolsa W&T + Cartão "Mãe Melhor Amiga" — R$ 135',
-    img:'WhatsApp Image 2026-05-03 at 10.44.37 (1).jpeg',
-    legend:'🌺 Pra mãe que também é sua melhor amiga!\n\nKit bolsa W&T caramelo com cartão especial "Mãe Melhor Amiga" e laço floral dourado — R$ 135,00 💛\n\n💕 Porque ela merece ser celebrada!\n\n📲 Reserve o seu!',
-    tags:'#MaeMelhorAmiga #DiadasMaes #KitBolsa #WTForBest' },
-  { kit:'Kit 9',  title:'Kit Bolsa 3 Peças Caramelo — Vista 1',
-    img:'WhatsApp Image 2026-05-03 at 10.44.36.jpeg',
-    legend:'🌸 O kit mais completo da loja!\n\nKit com bolsa grande + bolsinha menor + nécessaire caramelo, flores e laço floral premium 🌺💛\n\nCaixa dourada com adesivo "Feliz Dia das Mães" — presente que impressiona! 😍\n\n📲 Garanta o seu antes que esgote!',
-    tags:'#KitCompleto #DiadasMaes #BolsaCaramelo #Presentao' },
-  { kit:'Kit 10', title:'Kit Bolsa 3 Peças Caramelo — Vista 2',
-    img:'WhatsApp Image 2026-05-03 at 10.44.36 (1).jpeg',
-    legend:'🌸 O kit mais completo da loja!\n\nKit com bolsa grande + bolsinha menor + nécessaire caramelo, flores e laço floral premium 🌺💛\n\nCaixa dourada com adesivo "Feliz Dia das Mães" — presente que impressiona! 😍\n\n📲 Garanta o seu antes que esgote!',
-    tags:'#KitCompleto #DiadasMaes #BolsaCaramelo #Presentao' },
-  { kit:'Kit 11', title:'Bolsa Duce Moda Preta + Caixa Azul',
-    img:'WhatsApp Image 2026-05-03 at 10.44.36 (2).jpeg',
-    legend:'💙🖤 Presente sofisticado e cheio de personalidade!\n\nKit bolsa Duce Moda preta com caixa floral azul, copo personalizado e laço floral delicado 🌸\n\nFeliz Dia das Mães com muito amor e estilo! 💕\n\n📲 Encomende agora!',
-    tags:'#DuceModa #DiadasMaes #KitPresente #BolsaPreta' },
-  { kit:'Kit 12', title:'Bolsa Rosê + Cartão "Melhor Mãe do Mundo"',
-    img:'WhatsApp Image 2026-05-03 at 10.44.37 (2).jpeg',
-    legend:'🌹✨ Rosa que encanta!\n\nKit bolsa rosê com alça e laço dourado + floral, caixa dourada e cartão "Melhor Mãe do Mundo" 💛🌺\n\nPresente sofisticado que vai fazer ela se sentir especial! 💕\n\n📲 Chama no direct!',
-    tags:'#DiadasMaes #BolsaRose #MelhorMaeDoMundo #KitPresente' },
-  { kit:'Kit 13', title:'Bolsa Preta + Caixa Azul "Mãe Melhor Amiga"',
-    img:'WhatsApp Image 2026-05-03 at 10.44.37 (2).jpeg',
-    legend:'💙🖤 Para a mãe que é tudo na sua vida!\n\nKit bolsa preta + caixa azul floral com copo personalizado "Mãe Melhor Amiga" e laço dourado 🌸💛\n\nPresente elegante e com significado! 💕\n\n📲 Reserve o seu agora!',
-    tags:'#MaeMelhorAmiga #DiadasMaes #KitBolsa #PresenterElegante' },
-  { kit:'Kit 14', title:'Bolsa Bege + Almofada "Mãe Meu Porto-Seguro"',
-    img:'WhatsApp Image 2026-05-03 at 10.44.41 (2).jpeg',
-    legend:'🌸💕 "Mãe, meu porto-seguro!"\n\nKit bolsa bege + almofada com mensagem especial, laço floral rosa e embalagem temática 🎀\n\nUm presente cheio de amor e significado! 💗\n\n📲 Garanta o seu!',
-    tags:'#PortoSeguro #DiadasMaes #KitPresente #AlmofadaMae' },
-  { kit:'Kit 15', title:'Cesta com Garrafa de Vidro + Caderno',
-    img:'WhatsApp Image 2026-05-03 at 10.44.33 (1).jpeg',
-    legend:'👑💗 Pra mãe Rainha!\n\nKit cestinha com garrafa de vidro "Melhor Mãe do Mundo" + caderninho floral, laço pink e mimo especial 🌸✨\n\nPresente criativo e cheio de carinho! 💕\n\n📲 Encomende pelo WhatsApp!',
-    tags:'#MinhaMaeEUmaRainha #MelhorMaeDoMundo #DiadasMaes #KitCriativo' },
-  { kit:'Kit 16', title:'Cesta Gourmet com Biscoitos e Chocolates',
-    img:'WhatsApp Image 2026-05-03 at 10.44.38.jpeg',
-    legend:'🍫🍪 Para a mãe que ama um docinho!\n\nCesta gourmet com biscoitos artesanais, chocolates e mimo floral, laço floral delicado ✨\n\nUm presentinho gostoso e cheio de amor! 💕\n\n📲 Chama pra encomendar!',
-    tags:'#CestaGourmet #DiadasMaes #Chocolates #PresenterGourmet' },
-  { kit:'Kit 17', title:'Bolsa Caramelo + Caixa Dourada',
-    img:'WhatsApp Image 2026-05-03 at 10.44.41.jpeg',
-    legend:'💛🌸 Presentão dourado pra mãe!\n\nKit bolsa caramelo estilo executiva em caixa dourada premium com laço floral e flores decorativas 🌺✨\n\nSofisticação e carinho num só presente! 💕\n\n📲 Reserve agora!',
-    tags:'#DiadasMaes #BolsaCaramelo #KitDourado #PresenterSofisticado' },
-  { kit:'Kit 18', title:'Carteira Bege + Flores Salmão — R$ 150',
-    img:'WhatsApp Image 2026-05-03 at 10.44.41 (1).jpeg',
-    legend:'🌸✨ Delicado e elegante!\n\nKit carteira bege com laço dourado clássico e flores salmão, apresentado em caixa preta e dourada — R$ 150,00 💛\n\nPresente lindo e atemporal! 💕\n\n📲 Garanta o seu!',
-    tags:'#DiadasMaes #CarteiraPresente #KitMae #PresenterElegante' },
-  { kit:'Kit 19', title:'Bolsa Estampada + Copo + Flores — R$ 199',
-    img:'WhatsApp Image 2026-05-03 at 10.44.42.jpeg',
-    legend:'🌸👑 O presente mais desejado do Dia das Mães!\n\nKit bolsa estampada premium com corrente dourada + copo personalizado + flores e laço floral — R$ 199,00 💛🌺\n\nEla vai amar cada detalhe! 😍💕\n\n📲 Corre que é por tempo limitado!',
-    tags:'#DiadasMaes #KitPresente #BolsaEstampada #Presentao' }
+  { kit:'Kit 1',  title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.33.jpeg' },
+  { kit:'Kit 2',  title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.34.jpeg' },
+  { kit:'Kit 3',  title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.34 (1).jpeg' },
+  { kit:'Kit 4',  title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.35 (2).jpeg' },
+  { kit:'Kit 5',  title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.35 (1).jpeg' },
+  { kit:'Kit 6',  title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.35 (3).jpeg' },
+  { kit:'Kit 7',  title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.37.jpeg' },
+  { kit:'Kit 8',  title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.37 (1).jpeg' },
+  { kit:'Kit 9',  title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.36.jpeg' },
+  { kit:'Kit 10', title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.36 (1).jpeg' },
+  { kit:'Kit 11', title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.36 (2).jpeg' },
+  { kit:'Kit 12', title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.37 (2).jpeg' },
+  { kit:'Kit 13', title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.37 (2).jpeg' },
+  { kit:'Kit 14', title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.41 (2).jpeg' },
+  { kit:'Kit 15', title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.33 (1).jpeg' },
+  { kit:'Kit 16', title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.38.jpeg' },
+  { kit:'Kit 17', title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.41.jpeg' },
+  { kit:'Kit 18', title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.41 (1).jpeg' },
+  { kit:'Kit 19', title:'Kit Presente — Dia das Mães',        img:'WhatsApp Image 2026-05-03 at 10.44.42.jpeg' }
 ];
 
 function esc(v){ return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -327,8 +274,8 @@ function render(){
       + '</div>'
       + '<div class="post-body">'
       + '<div class="post-title">' + esc(p.title) + '</div>'
-      + '<div class="post-legend-box">' + esc(p.legend) + '</div>'
-      + '<div class="post-hashtags">' + esc(p.tags) + '</div>'
+      + '<div class="post-legend-box">' + esc(LEGENDA) + '</div>'
+      + '<div class="post-hashtags">' + esc(TAGS) + '</div>'
       + '</div>'
       + '<div class="post-footer">'
       + '<button class="btn-copy" id="btnCopy' + i + '" onclick="copiar(' + i + ')"><i class="fas fa-copy"></i> Copiar legenda</button>'
@@ -340,7 +287,7 @@ function render(){
 
 function copiar(i){
   var p = _posts[i];
-  var txt = p.legend + '\n\n' + p.tags;
+  var txt = LEGENDA + '\n\n' + TAGS;
   navigator.clipboard.writeText(txt).then(function(){
     var btn = document.getElementById('btnCopy' + i);
     btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
